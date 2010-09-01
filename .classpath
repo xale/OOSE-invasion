@@ -1,8 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="lib" path="InvasionInterface.jar"/>
-	<classpathentry kind="lib" path="StandardInvasionModel.jar"/>
-	<classpathentry kind="lib" path="StandardInvasionUI.jar"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="InvasionInterface.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/Users/alex_heinz/Documents/School/10-11 Senior/Homework/OOSE/invasion/doc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="StandardInvasionModel.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/Users/alex_heinz/Documents/School/10-11 Senior/Homework/OOSE/invasion/doc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="StandardInvasionUI.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/Users/alex_heinz/Documents/School/10-11 Senior/Homework/OOSE/invasion/doc/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
