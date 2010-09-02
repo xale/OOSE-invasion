@@ -13,6 +13,7 @@ import java.util.*;
 
 import edu.jhu.cs.oose.fall2010.invasion.iface.IllegalMoveException;
 import edu.jhu.cs.oose.fall2010.invasion.iface.InvasionModel;
+import edu.jhu.cs.oose.fall2010.invasion.iface.InvasionModelEvent;
 import edu.jhu.cs.oose.fall2010.invasion.iface.InvasionModelListener;
 import edu.jhu.cs.oose.fall2010.invasion.iface.Location;
 import edu.jhu.cs.oose.fall2010.invasion.iface.Player;
@@ -39,12 +40,12 @@ public class MyInvasionModel implements InvasionModel
 	}
 	
 	/* (non-Javadoc)
-	 * @see edu.jhu.cs.oose.fall2010.invasion.iface.InvasionModel#addListener(edu.jhu.cs.oose.fall2010.invasion.iface.InvasionModelListener)
+	 * @see edu.jhu.cs.oose.fall2010.invasion.iface.InvasionModel#move(edu.jhu.cs.oose.fall2010.invasion.iface.Location, edu.jhu.cs.oose.fall2010.invasion.iface.Location)
 	 */
 	@Override
-	public void addListener(InvasionModelListener listener)
+	public void move(Location fromLocation, Location toLocation) throws IllegalMoveException
 	{
-		this.listeners.add(listener);
+		// TODO Auto-generated method stub
 	}
 	
 	/* (non-Javadoc)
@@ -59,6 +60,15 @@ public class MyInvasionModel implements InvasionModel
 		this.currentPlayer = this.getNextPlayer();
 		
 		// TODO: notify listeners
+	}
+	
+	/* (non-Javadoc)
+	 * @see edu.jhu.cs.oose.fall2010.invasion.iface.InvasionModel#getCurrentPlayer()
+	 */
+	@Override
+	public Player getCurrentPlayer()
+	{
+		return this.currentPlayer;
 	}
 	
 	/**
@@ -78,15 +88,6 @@ public class MyInvasionModel implements InvasionModel
 		}
 		
 		throw new RuntimeException("Invalid currentPlayer in MyInvasionModel.getNextPlayer(): " + this.currentPlayer);
-	}
-
-	/* (non-Javadoc)
-	 * @see edu.jhu.cs.oose.fall2010.invasion.iface.InvasionModel#getCurrentPlayer()
-	 */
-	@Override
-	public Player getCurrentPlayer()
-	{
-		return this.currentPlayer;
 	}
 	
 	/* (non-Javadoc)
@@ -109,12 +110,24 @@ public class MyInvasionModel implements InvasionModel
 	}
 	
 	/* (non-Javadoc)
-	 * @see edu.jhu.cs.oose.fall2010.invasion.iface.InvasionModel#move(edu.jhu.cs.oose.fall2010.invasion.iface.Location, edu.jhu.cs.oose.fall2010.invasion.iface.Location)
+	 * @see edu.jhu.cs.oose.fall2010.invasion.iface.InvasionModel#addListener(edu.jhu.cs.oose.fall2010.invasion.iface.InvasionModelListener)
 	 */
 	@Override
-	public void move(Location fromLocation, Location toLocation) throws IllegalMoveException
+	public void addListener(InvasionModelListener listener)
 	{
-		// TODO Auto-generated method stub
+		this.listeners.add(listener);
+	}
+	
+	/**
+	 * Sends the specified event to this model's listeners.
+	 * @param event The event to send to the listeners.
+	 */
+	private void sendEvent(InvasionModelEvent event)
+	{
+		for (InvasionModelListener listener : this.listeners)
+		{
+			listener.receiveEvent(event);
+		}
 	}
 	
 	/* (non-Javadoc)
