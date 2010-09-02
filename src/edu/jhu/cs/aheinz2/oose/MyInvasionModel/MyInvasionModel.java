@@ -37,6 +37,8 @@ public class MyInvasionModel implements InvasionModel
 	{
 		// Initialize first player (pirates always play first)
 		currentPlayer = Player.PIRATE;
+		
+		// TODO: additional initialization code
 	}
 	
 	/* (non-Javadoc)
@@ -59,7 +61,8 @@ public class MyInvasionModel implements InvasionModel
 		// Change the current player
 		this.currentPlayer = this.getNextPlayer();
 		
-		// TODO: notify listeners
+		// Notify observers of turn change
+		this.sendEvent(new InvasionModelEvent(false, true, false));
 	}
 	
 	/* (non-Javadoc)
@@ -115,6 +118,7 @@ public class MyInvasionModel implements InvasionModel
 	@Override
 	public void addListener(InvasionModelListener listener)
 	{
+		// Add to the model's set of listeners
 		this.listeners.add(listener);
 	}
 	
@@ -124,8 +128,10 @@ public class MyInvasionModel implements InvasionModel
 	 */
 	private void sendEvent(InvasionModelEvent event)
 	{
+		// Iterate over the model's current listeners
 		for (InvasionModelListener listener : this.listeners)
 		{
+			// Send the event to each listener
 			listener.receiveEvent(event);
 		}
 	}
@@ -136,6 +142,7 @@ public class MyInvasionModel implements InvasionModel
 	@Override
 	public void removeListener(InvasionModelListener listener)
 	{
+		// Remove from the model's set of listeners
 		this.listeners.remove(listener);
 	}
 	
