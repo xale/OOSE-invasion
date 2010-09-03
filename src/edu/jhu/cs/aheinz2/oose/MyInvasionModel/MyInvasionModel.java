@@ -141,4 +141,147 @@ public class MyInvasionModel implements InvasionModel
 		this.listeners.remove(listener);
 	}
 	
+	/**
+	 * Object used by the model to represent an Invasion game board.
+	 * @author alex_heinz
+	 */
+	static class MyInvasionBoard
+	{
+		// Note: the board is indexed left-to-right, top-to-bottom
+		private MyInvasionPiece[][] contents = new MyInvasionPiece[InvasionModelConstants.INVASION_BOARD_WIDTH][InvasionModelConstants.INVASION_BOARD_HEIGHT];
+		private Map<Location,Set<Location>> diagonals = new HashMap<Location,Set<Location>>();
+		
+		/**
+		 * Initializes a new board for the game, with all pieces in place.
+		 */
+		public MyInvasionBoard()
+		{
+			// Set up the pirates pieces
+			for (int x = 0; x < InvasionModelConstants.INVASION_BOARD_WIDTH; x++)
+			{
+				for (int y = 0; y <= InvasionModelConstants.INVASION_BOARD_NUM_PIRATE_OCCUPIED_ROWS; y++)
+				{
+					if (this.coordinatesAreOnBoard(x, y))
+						this.contents[x][y] = new MyInvasionPiece(Player.PIRATE);
+				}
+			}
+			
+			// Set up the bulgars pieces
+			for (Location location : InvasionModelConstants.INVASION_BOARD_INITIAL_BULGAR_LOCATIONS)
+			{
+				this.contents[location.getX()][location.getY()] = new MyInvasionPiece(Player.BULGAR);
+			}
+			
+			// Map each location on the board to a set of locations that are adjacent across a diagonal
+			for (int x = 0; x < InvasionModelConstants.INVASION_BOARD_WIDTH; x++)
+			{
+				for (int y = 0; y < InvasionModelConstants.INVASION_BOARD_HEIGHT; y++)
+				{
+					// Shortcut: diagonally join locations with "even" coordinates; i.e., the subset of (valid) locations for which (x + y) is even
+					if (this.coordinatesAreOnBoard(x, y) && (((x + y) % 2) == 0))
+					{
+						// Add each valid, diagonally-adjacent neighbor of the location to a set
+						Set<Location> adjacents = new HashSet<Location>(4);
+						if (this.coordinatesAreOnBoard((x - 1), (y - 1)))
+							adjacents.add(new Location((x - 1), (y - 1)));
+						if (this.coordinatesAreOnBoard((x + 1), (y - 1)))
+							adjacents.add(new Location((x + 1), (y - 1)));
+						if (this.coordinatesAreOnBoard((x - 1), (y + 1)))
+							adjacents.add(new Location((x - 1), (y + 1)));
+						if (this.coordinatesAreOnBoard((x + 1), (y + 1)))
+							adjacents.add(new Location((x + 1), (y + 1)));
+						
+						// Map the location to the set
+						this.diagonals.put(new Location(x, y), adjacents);
+					}
+					else
+					{
+						// If the location has no diagonals, map it to an empty set
+						this.diagonals.put(new Location(x, y), new HashSet<Location>(0));
+					}
+				}
+			}
+		}
+		
+		/**
+		 * Returns the piece at the specified Location.
+		 * @return The piece at the specified location on the board, if present, or null.
+		 * @throw IllegalMoveException If the specified location lies beyond the bounds of the board.
+		 */
+		public MyInvasionPiece getPieceAtLocation(Location location) throws IllegalMoveException
+		{
+			// Check if the location is valid (i.e., on the board)
+			if (!this.locationIsOnBoard(location))
+				throw new IllegalMoveException("Location is not on the board");
+			
+			return this.contents[location.getX()][location.getY()];
+		}
+		
+		/**
+		 * Determines whether a given location is valid in the board's coordinate system; i.e., if the location is on the board.
+		 * @param location The location to test.
+		 * @return True if the location is a valid location on the board, false otherwise.
+		 */
+		public boolean locationIsOnBoard(Location location)
+		{
+			return this.coordinatesAreOnBoard(location.getX(), location.getY());
+		}
+		
+		/**
+		 * Determines if the specified x- and y-coordinates specify a valid location on the board.
+		 * @param x The x-coordinate of the location to test.
+		 * @param y The y-coordinate of the location to test.
+		 * @return True of the board contains (x, y), false otherwise.
+		 */
+		public boolean coordinatesAreOnBoard(int x, int y)
+		{
+			// Check that the location is within the bounds of the board
+			if ((x < 0) || (y < 0) || (x >= InvasionModelConstants.INVASION_BOARD_WIDTH) || (y >= InvasionModelConstants.INVASION_BOARD_HEIGHT))
+				return false;
+			
+			// Check that the location does not lie in one of the corners
+			// Top left corner
+			if ((x < InvasionModelConstants.INVASION_BOARD_CORNER_WIDTH) && (y < InvasionModelConstants.INVASION_BOARD_CORNER_HEIGHT))
+				return false;
+			// Top right corner
+			if ((x >= (InvasionModelConstants.INVASION_BOARD_WIDTH - InvasionModelConstants.INVASION_BOARD_CORNER_WIDTH)) && (y < InvasionModelConstants.INVASION_BOARD_CORNER_HEIGHT))
+				return false;
+			// Bottom left corner
+			if ((x < InvasionModelConstants.INVASION_BOARD_CORNER_WIDTH) && (y >= (InvasionModelConstants.INVASION_BOARD_HEIGHT - InvasionModelConstants.INVASION_BOARD_CORNER_HEIGHT)))
+				return false;
+			// Bottom right corner
+			if ((x >= (InvasionModelConstants.INVASION_BOARD_WIDTH - InvasionModelConstants.INVASION_BOARD_CORNER_WIDTH)) && (y >= (InvasionModelConstants.INVASION_BOARD_HEIGHT - InvasionModelConstants.INVASION_BOARD_CORNER_HEIGHT)))
+				return false;
+			
+			// Valid location
+			return true;
+		}
+	}
+	
+	/**
+	 * Object used by the model to represent a piece on an Invasion game board.
+	 * @author alex_heinz
+	 */
+	static class MyInvasionPiece
+	{
+		private Player owner = null;
+		
+		/**
+		 * Initializes a piece owned by the specified player.
+		 * @param owner The player owning the new piece.
+		 */
+		public MyInvasionPiece(Player owner)
+		{
+			this.owner = owner;
+		}
+		
+		/**
+		 * Accesses the piece's owner.
+		 * @return The piece's owner.
+		 */
+		public Player getOwner()
+		{
+			return this.owner;
+		}
+	}
 }
