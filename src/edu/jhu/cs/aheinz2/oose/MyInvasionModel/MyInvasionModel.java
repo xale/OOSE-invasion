@@ -11,12 +11,7 @@ package edu.jhu.cs.aheinz2.oose.MyInvasionModel;
 
 import java.util.*;
 
-import edu.jhu.cs.oose.fall2010.invasion.iface.IllegalMoveException;
-import edu.jhu.cs.oose.fall2010.invasion.iface.InvasionModel;
-import edu.jhu.cs.oose.fall2010.invasion.iface.InvasionModelEvent;
-import edu.jhu.cs.oose.fall2010.invasion.iface.InvasionModelListener;
-import edu.jhu.cs.oose.fall2010.invasion.iface.Location;
-import edu.jhu.cs.oose.fall2010.invasion.iface.Player;
+import edu.jhu.cs.oose.fall2010.invasion.iface.*;
 
 /**
  * @author alex_heinz
@@ -38,7 +33,7 @@ public class MyInvasionModel implements InvasionModel
 		// Initialize first player (pirates always play first)
 		currentPlayer = Player.PIRATE;
 		
-		// TODO: additional initialization code
+		// TODO: additional initialization code?
 	}
 	
 	/* (non-Javadoc)
