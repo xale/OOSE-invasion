@@ -19,9 +19,11 @@ import edu.jhu.cs.oose.fall2010.invasion.iface.*;
  */
 public class MyInvasionModel implements InvasionModel
 {
-	private Set<InvasionModelListener> listeners = new HashSet<InvasionModelListener>();
+	private MyInvasionBoard board = new MyInvasionBoard();
 	private Player currentPlayer = null;
 	private Player winningPlayer = null;
+	
+	private Set<InvasionModelListener> listeners = new HashSet<InvasionModelListener>();
 	
 	/**
 	 * Creates a new MyInvasionModel object.
@@ -94,7 +96,23 @@ public class MyInvasionModel implements InvasionModel
 	@Override
 	public Player getPieceOwner(Location location)
 	{
-		// TODO Auto-generated method stub
+		MyInvasionPiece piece = null;
+		try
+		{
+			// Check if there is a piece at the specified location
+			piece = this.board.getPieceAtLocation(location);
+		}
+		catch (IllegalMoveException illegalMove)
+		{
+			// Indicates that the location is invalid; the interface provides no way to handle this, so we must ignore it and return null
+			return null;
+		}
+		
+		// If there is a piece at the location, return the piece's owner
+		if (piece != null)
+			return piece.getOwner();
+		
+		// Otherwise, return null
 		return null;
 	}
 	
