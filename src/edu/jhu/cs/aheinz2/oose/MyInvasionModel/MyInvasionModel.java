@@ -20,23 +20,11 @@ import edu.jhu.cs.oose.fall2010.invasion.iface.*;
 public class MyInvasionModel implements InvasionModel
 {
 	private MyInvasionBoard board = new MyInvasionBoard();
-	private Player currentPlayer = null;
+	private Player currentPlayer = Player.PIRATE;	// Pirates play first
+	private boolean currentPlayerHasMoved = false;
 	private Player winningPlayer = null;
 	
 	private Set<InvasionModelListener> listeners = new HashSet<InvasionModelListener>();
-	
-	/**
-	 * Creates a new MyInvasionModel object.
-	 * 
-	 * 
-	 */
-	public MyInvasionModel()
-	{
-		// Initialize first player (pirates always play first)
-		currentPlayer = Player.PIRATE;
-		
-		// TODO: additional initialization code?
-	}
 	
 	/* (non-Javadoc)
 	 * @see edu.jhu.cs.oose.fall2010.invasion.iface.InvasionModel#move(edu.jhu.cs.oose.fall2010.invasion.iface.Location, edu.jhu.cs.oose.fall2010.invasion.iface.Location)
