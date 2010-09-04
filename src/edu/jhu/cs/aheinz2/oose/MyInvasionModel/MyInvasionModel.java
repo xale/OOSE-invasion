@@ -243,7 +243,9 @@ public class MyInvasionModel implements InvasionModel
 						MyInvasionPiece piece = this.contents[x][y];
 						if ((piece != null) && piece.getOwner().equals(player))
 						{
-							// TODO: check if this piece can be moved
+							// Determine if the piece can be moved
+							if (this.playerCanMovePieceAtCoordinates(piece.getOwner(), x, y))
+								return true;
 						}
 					}
 				}
@@ -251,7 +253,90 @@ public class MyInvasionModel implements InvasionModel
 			
 			return false;
 		}
-
+		
+		/**
+		 * Determines if a piece at the specified coordinates, owned by the specified player, can be moved.
+		 * @param pieceOwner The piece's owner.
+		 * @param x The x-coordinate of the piece.
+		 * @param y The y-coordinate of the piece.
+		 * @return True if the piece can be moved (or can jump) in at least one direction, false otherwise.
+		 */
+		// TODO: clean this method up
+		private boolean playerCanMovePieceAtCoordinates(Player pieceOwner, int x, int y)
+		{
+			// Determine if the player controls the pirates
+			boolean isPirate = pieceOwner.equals(Player.PIRATE);
+			
+			// Determine how far the piece currently is from the fortress
+			int currentDistance = this.distanceOfCoordinatesFromFortress(x, y);
+			
+			// Check each possible direction of horizontal or vertical movement
+			// Left
+			if (this.coordinatesAreOnBoard((x - 1), y) && (this.contents[(x - 1)][y] == null) && !(isPirate && (this.distanceOfCoordinatesFromFortress((x - 1), y) > currentDistance)))
+				return true;
+			// Right
+			if (this.coordinatesAreOnBoard((x + 1), y) && (this.contents[(x + 1)][y] == null) && !(isPirate && (this.distanceOfCoordinatesFromFortress((x + 1), y) > currentDistance)))
+				return true;
+			// Down
+			if (this.coordinatesAreOnBoard(x, (y + 1)) && (this.contents[x][(y + 1)] == null) && !(isPirate && (this.distanceOfCoordinatesFromFortress(x, (y + 1)) > currentDistance)))
+				return true;
+			// Up
+			if (this.coordinatesAreOnBoard(x, (y - 1)) && (this.contents[x][(y - 1)] == null) && !(isPirate && (this.distanceOfCoordinatesFromFortress(x, (y - 1)) > currentDistance)))
+				return true;
+			
+			// Check for diagonal moves
+			for (Location location : this.diagonals.get(new Location(x, y)))
+			{
+				if ((this.contents[location.getX()][location.getY()] == null) && !(isPirate && (this.distanceOfCoordinatesFromFortress(location.getX(), location.getY()) > currentDistance)))
+					return true;
+			}
+			
+			// If the player controls the bulgars, check for legal jumps
+			if (!isPirate)
+			{
+				// Left
+				if (this.coordinatesAreOnBoard((x - 2), y) && (this.contents[(x - 2)][y] == null) && (this.contents[(x - 1)][y] != null) && (this.contents[(x - 1)][y].getOwner().equals(Player.PIRATE)))
+					return true;
+				// Right
+				if (this.coordinatesAreOnBoard((x + 2), y) && (this.contents[(x + 2)][y] == null) && (this.contents[(x + 1)][y] != null) && (this.contents[(x + 1)][y].getOwner().equals(Player.PIRATE)))
+					return true;
+				// Up
+				if (this.coordinatesAreOnBoard(x, (y - 2)) && (this.contents[x][(y - 2)] == null) && (this.contents[x][(y - 1)] != null) && (this.contents[x][(y - 1)].getOwner().equals(Player.PIRATE)))
+					return true;
+				// Down
+				if (this.coordinatesAreOnBoard(x, (y + 2)) && (this.contents[x][(y + 2)] == null) && (this.contents[x][(y + 1)] != null) && (this.contents[x][(y + 1)].getOwner().equals(Player.PIRATE)))
+					return true;
+				
+				// Check for diagonal jumps
+				for (Location location : this.diagonals.get(new Location(x, y)))
+				{
+					// Check if there are any diagonally-adjacent pirates
+					MyInvasionPiece piece = contents[location.getX()][location.getY()];
+					if ((piece != null) && (piece.getOwner().equals(Player.PIRATE)))
+					{
+						// Check that the location on the other side of the pirate exists and is unoccupied
+						Location jumpDestination = new Location((x + (location.getX() - x)), (y + (location.getX() - y)));
+						if (this.diagonals.get(location).contains(jumpDestination) && (this.contents[jumpDestination.getX()][jumpDestination.getY()] == null))
+							return true;
+					}
+				}
+			}
+			
+			return false;
+		}
+		
+		/**
+		 * Determines the minimum number of moves necessary to reach the fortress from the given coordinates.
+		 * @param x The starting x-coordinate.
+		 * @param y The starting y-coordinate.
+		 * @return The number of moves separating (x, y) and the closest coordinates inside the fortress.
+		 */
+		public int distanceOfCoordinatesFromFortress(int x, int y)
+		{
+			// TODO: WRITEME
+			return 0;
+		}
+		
 		/**
 		 * Returns the piece at the specified Location.
 		 * @return The piece at the specified location on the board, if present, or null.
