@@ -32,7 +32,19 @@ public class MyInvasionModel implements InvasionModel
 	@Override
 	public void move(Location fromLocation, Location toLocation) throws IllegalMoveException
 	{
-		// TODO Auto-generated method stub
+		// Check that the piece being moved is owned by the current player
+		if (!this.getPieceOwner(fromLocation).equals(this.currentPlayer))
+			throw new IllegalMoveException("You cannot move your opponent's pieces");
+		
+		// TODO: move piece
+		
+		// Make note that the player has made a move
+		this.currentPlayerHasMoved = true;
+		
+		// TODO: check for end-of-game
+		
+		// Notify listeners of moved piece
+		this.sendEvent(new InvasionModelEvent(true, false, false));
 	}
 	
 	/* (non-Javadoc)
@@ -41,12 +53,15 @@ public class MyInvasionModel implements InvasionModel
 	@Override
 	public void endTurn() throws IllegalMoveException
 	{
-		// TODO: check for illegal end-of-turn
+		// Check that the player can legally end his or her turn
+		if (this.board.playerHasLegalMoves(this.currentPlayer) && !this.currentPlayerHasMoved)
+			throw new IllegalMoveException("You must make a move");
 		
 		// Change the current player
 		this.currentPlayer = this.getNextPlayer();
+		this.currentPlayerHasMoved = false;
 		
-		// Notify observers of turn change
+		// Notify listeners of turn change
 		this.sendEvent(new InvasionModelEvent(false, true, false));
 	}
 	
@@ -254,13 +269,13 @@ public class MyInvasionModel implements InvasionModel
 		 * @return The piece at (x, y) on the board, or null.
 		 * @throws IllegalMoveException If the specified coordinates lie beyond the bounds of the board.
 		 */
-		public MyInvasionPiece getPieceAtCoordinates(int x, int y) throws IllegalMoveException
+		private MyInvasionPiece getPieceAtCoordinates(int x, int y) throws IllegalMoveException
 		{
 			// Check if the coordinates are valid (i.e., on the board)
 			if (!this.coordinatesAreOnBoard(x, y))
 				throw new IllegalMoveException("Location is not on the board");
 			
-			// Return the contents of the board at the speicified location
+			// Return the contents of the board at the specified coordinates
 			return this.contents[x][y];
 		}
 		
@@ -280,7 +295,7 @@ public class MyInvasionModel implements InvasionModel
 		 * @param y The y-coordinate of the location to test.
 		 * @return True of the board contains (x, y), false otherwise.
 		 */
-		public boolean coordinatesAreOnBoard(int x, int y)
+		private boolean coordinatesAreOnBoard(int x, int y)
 		{
 			// Check that the location is within the bounds of the board
 			if ((x < 0) || (y < 0) || (x >= InvasionModelConstants.INVASION_BOARD_WIDTH) || (y >= InvasionModelConstants.INVASION_BOARD_HEIGHT))
