@@ -210,17 +210,58 @@ public class MyInvasionModel implements InvasionModel
 		}
 		
 		/**
+		 * Determines if the specified player can legally move a piece on the field.
+		 * @param player The player attempting to move.
+		 * @return True if the player has at least one legal move, false otherwise.
+		 */
+		public boolean playerHasLegalMoves(Player player)
+		{
+			// Iterate over the board, looking for the player's pieces
+			for (int x = 0; x < InvasionModelConstants.INVASION_BOARD_WIDTH; x++)
+			{
+				for (int y = 0; x < InvasionModelConstants.INVASION_BOARD_HEIGHT; y++)
+				{
+					// Check that these coordinates are on the board
+					if (this.coordinatesAreOnBoard(x, y))
+					{
+						// Determine if there is a piece owned by the player at these coordinates
+						MyInvasionPiece piece = this.contents[x][y];
+						if ((piece != null) && piece.getOwner().equals(player))
+						{
+							// TODO: check if this piece can be moved
+						}
+					}
+				}
+			}
+			
+			return false;
+		}
+
+		/**
 		 * Returns the piece at the specified Location.
 		 * @return The piece at the specified location on the board, if present, or null.
 		 * @throw IllegalMoveException If the specified location lies beyond the bounds of the board.
 		 */
 		public MyInvasionPiece getPieceAtLocation(Location location) throws IllegalMoveException
 		{
-			// Check if the location is valid (i.e., on the board)
-			if (!this.locationIsOnBoard(location))
+			return this.getPieceAtCoordinates(location.getX(), location.getY());
+		}
+		
+		/**
+		 * Returns the piece at the specified coordinates, or null if no piece exists.
+		 * @param x The x-coordinate of the piece.
+		 * @param y The y-coordinate of the piece.
+		 * @return The piece at (x, y) on the board, or null.
+		 * @throws IllegalMoveException If the specified coordinates lie beyond the bounds of the board.
+		 */
+		public MyInvasionPiece getPieceAtCoordinates(int x, int y) throws IllegalMoveException
+		{
+			// Check if the coordinates are valid (i.e., on the board)
+			if (!this.coordinatesAreOnBoard(x, y))
 				throw new IllegalMoveException("Location is not on the board");
 			
-			return this.contents[location.getX()][location.getY()];
+			// Return the contents of the board at the speicified location
+			return this.contents[x][y];
 		}
 		
 		/**
