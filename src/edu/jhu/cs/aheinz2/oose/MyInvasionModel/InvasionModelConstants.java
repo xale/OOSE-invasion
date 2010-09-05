@@ -18,8 +18,14 @@ interface InvasionModelConstants
 {
 	static final int INVASION_BOARD_WIDTH = 7;
 	static final int INVASION_BOARD_HEIGHT = INVASION_BOARD_WIDTH;
+	
 	static final int INVASION_BOARD_CORNER_WIDTH = 2;
 	static final int INVASION_BOARD_CORNER_HEIGHT = INVASION_BOARD_CORNER_WIDTH;
+	
+	static final int INVASION_BOARD_FORTRESS_MIN_X = 2;
+	static final int INVASION_BOARD_FORTRESS_MIN_Y = 4;
+	static final int INVASION_BOARD_FORTRESS_MAX_X = 4;
+	static final int INVASION_BOARD_FORTRESS_MAX_Y = 6;
 	
 	static final int INVASION_BOARD_NUM_PIRATE_OCCUPIED_ROWS = 4;
 	static final Location[] INVASION_BOARD_INITIAL_BULGAR_LOCATIONS =
@@ -27,6 +33,8 @@ interface InvasionModelConstants
 		new Location(2, 5),
 		new Location(4, 5)
 	};
+	
+	static final int INVASION_BOARD_MINIMUM_PIRATES_TO_WIN = 9;
 	
 	static final int[][] INVASION_BOARD_FORTRESS_DISTANCES =
 	{

@@ -331,6 +331,7 @@ public class MyInvasionModel implements InvasionModel
 		// Note: the board is indexed left-to-right, top-to-bottom
 		private MyInvasionPiece[][] contents = new MyInvasionPiece[InvasionModelConstants.INVASION_BOARD_WIDTH][InvasionModelConstants.INVASION_BOARD_HEIGHT];
 		private Map<Location,Set<Location>> diagonals = new HashMap<Location,Set<Location>>();
+		private int piratesLeft = 0;
 		
 		/**
 		 * Initializes a new board for the game, with all pieces in place.
@@ -343,7 +344,10 @@ public class MyInvasionModel implements InvasionModel
 				for (int y = 0; y < InvasionModelConstants.INVASION_BOARD_NUM_PIRATE_OCCUPIED_ROWS; y++)
 				{
 					if (this.coordinatesAreOnBoard(x, y))
+					{
 						this.contents[x][y] = new MyInvasionPiece(Player.PIRATE);
+						this.piratesLeft++;
+					}
 				}
 			}
 			
@@ -402,12 +406,13 @@ public class MyInvasionModel implements InvasionModel
 		}
 
 		/**
-		 * Removes a (jumped/captured) piece from the board.
+		 * Removes a (jumped/captured) piece (assumed to be a pirate) from the board.
 		 * @param pieceLocation The location of the piece to remove.
 		 */
 		public void removePiece(Location pieceLocation)
 		{
 			this.contents[pieceLocation.getX()][pieceLocation.getY()] = null;
+			this.piratesLeft--;
 		}
 		
 		/**
@@ -603,7 +608,24 @@ public class MyInvasionModel implements InvasionModel
 		 */
 		public Player getGameWinner()
 		{
-			// TODO Auto-generated method stub
+			// Check if the pirates control the fortress
+			boolean occupied = true;
+			for (int x = InvasionModelConstants.INVASION_BOARD_FORTRESS_MIN_X; occupied && (x <= InvasionModelConstants.INVASION_BOARD_FORTRESS_MAX_X); x++)
+			{
+				for (int y = InvasionModelConstants.INVASION_BOARD_FORTRESS_MIN_Y; occupied && (y <= InvasionModelConstants.INVASION_BOARD_FORTRESS_MAX_Y); y++)
+				{
+					MyInvasionPiece piece = this.contents[x][y]; 
+					if ((piece == null) || !piece.getOwner().equals(Player.PIRATE))
+						occupied = false;
+				}
+			}
+			if (occupied)
+				return Player.PIRATE;
+			
+			// Check if there are enough pirates left to win
+			if (this.piratesLeft < InvasionModelConstants.INVASION_BOARD_MINIMUM_PIRATES_TO_WIN)
+				return Player.BULGAR;
+			
 			return null;
 		}
 		
