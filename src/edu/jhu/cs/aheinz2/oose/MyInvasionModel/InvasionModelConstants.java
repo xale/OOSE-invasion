@@ -27,4 +27,15 @@ interface InvasionModelConstants
 		new Location(2, 5),
 		new Location(4, 5)
 	};
+	
+	static final int[][] INVASION_BOARD_FORTRESS_DISTANCES =
+	{
+		{-1, -1, 2, 2, 2, -1, -1},
+		{-1, -1, 2, 1, 1, -1, -1},
+		{4, 3, 2, 1, 0, 0, 0},
+		{4, 3, 2, 1, 0, 0, 0},
+		{4, 3, 2, 1, 0, 0, 0},
+		{-1, -1, 2, 1, 1, -1, -1},
+		{-1, -1, 2, 2, 2, -1, -1}
+	};
 }

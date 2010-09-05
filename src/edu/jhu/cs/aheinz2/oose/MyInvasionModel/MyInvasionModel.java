@@ -263,27 +263,26 @@ public class MyInvasionModel implements InvasionModel
 			// Determine if the player controls the pirates
 			boolean isPirate = pieceOwner.equals(Player.PIRATE);
 			
-			// Determine how far the piece currently is from the fortress
-			int currentDistance = this.distanceOfCoordinatesFromFortress(x, y);
+			Location oldLocation = new Location(x, y);
 			
 			// Check each possible direction of horizontal or vertical movement
 			// Left
-			if (this.coordinatesAreOnBoard((x - 1), y) && (this.contents[(x - 1)][y] == null) && !(isPirate && (this.distanceOfCoordinatesFromFortress((x - 1), y) > currentDistance)))
+			if (this.coordinatesAreOnBoard((x - 1), y) && (this.contents[(x - 1)][y] == null) && !(isPirate && this.locationIsFurtherFromFortress(new Location((x - 1), y), oldLocation)))
 				return true;
 			// Right
-			if (this.coordinatesAreOnBoard((x + 1), y) && (this.contents[(x + 1)][y] == null) && !(isPirate && (this.distanceOfCoordinatesFromFortress((x + 1), y) > currentDistance)))
+			if (this.coordinatesAreOnBoard((x + 1), y) && (this.contents[(x + 1)][y] == null) && !(isPirate && this.locationIsFurtherFromFortress(new Location((x + 1), y), oldLocation)))
 				return true;
 			// Down
-			if (this.coordinatesAreOnBoard(x, (y + 1)) && (this.contents[x][(y + 1)] == null) && !(isPirate && (this.distanceOfCoordinatesFromFortress(x, (y + 1)) > currentDistance)))
+			if (this.coordinatesAreOnBoard(x, (y + 1)) && (this.contents[x][(y + 1)] == null) && !(isPirate && this.locationIsFurtherFromFortress(new Location(x, (y + 1)), oldLocation)))
 				return true;
 			// Up
-			if (this.coordinatesAreOnBoard(x, (y - 1)) && (this.contents[x][(y - 1)] == null) && !(isPirate && (this.distanceOfCoordinatesFromFortress(x, (y - 1)) > currentDistance)))
+			if (this.coordinatesAreOnBoard(x, (y - 1)) && (this.contents[x][(y - 1)] == null) && !(isPirate && this.locationIsFurtherFromFortress(new Location(x, (y - 1)), oldLocation)))
 				return true;
 			
 			// Check for diagonal moves
-			for (Location location : this.diagonals.get(new Location(x, y)))
+			for (Location newLocation : this.diagonals.get(oldLocation))
 			{
-				if ((this.contents[location.getX()][location.getY()] == null) && !(isPirate && (this.distanceOfCoordinatesFromFortress(location.getX(), location.getY()) > currentDistance)))
+				if ((this.contents[newLocation.getX()][newLocation.getY()] == null) && !(isPirate && this.locationIsFurtherFromFortress(newLocation, oldLocation)))
 					return true;
 			}
 			
@@ -304,15 +303,15 @@ public class MyInvasionModel implements InvasionModel
 					return true;
 				
 				// Check for diagonal jumps
-				for (Location location : this.diagonals.get(new Location(x, y)))
+				for (Location newLocation : this.diagonals.get(oldLocation))
 				{
 					// Check if there are any diagonally-adjacent pirates
-					MyInvasionPiece piece = contents[location.getX()][location.getY()];
+					MyInvasionPiece piece = contents[newLocation.getX()][newLocation.getY()];
 					if ((piece != null) && (piece.getOwner().equals(Player.PIRATE)))
 					{
 						// Check that the location on the other side of the pirate exists and is unoccupied
-						Location jumpDestination = new Location((x + (location.getX() - x)), (y + (location.getX() - y)));
-						if (this.diagonals.get(location).contains(jumpDestination) && (this.contents[jumpDestination.getX()][jumpDestination.getY()] == null))
+						Location jumpDestination = new Location((x + (newLocation.getX() - x)), (y + (newLocation.getX() - y)));
+						if (this.diagonals.get(newLocation).contains(jumpDestination) && (this.contents[jumpDestination.getX()][jumpDestination.getY()] == null))
 							return true;
 					}
 				}
@@ -322,15 +321,29 @@ public class MyInvasionModel implements InvasionModel
 		}
 		
 		/**
-		 * Determines the minimum number of moves necessary to reach the fortress from the given coordinates.
-		 * @param x The starting x-coordinate.
-		 * @param y The starting y-coordinate.
-		 * @return The number of moves separating (x, y) and the closest coordinates inside the fortress.
+		 * Determines if a new location is further from the fortress than a reference location.
+		 * @param newLocation The new location.
+		 * @param referenceLocation The reference location.
+		 * @return True if newLocation is close to the fortress than fromLocation, false otherwise. 
 		 */
-		public int distanceOfCoordinatesFromFortress(int x, int y)
+		private boolean locationIsFurtherFromFortress(Location newLocation, Location referenceLocation)
 		{
-			// TODO: WRITEME
-			return 0;
+			return (this.distanceOfLocationFromFortress(newLocation) > this.distanceOfLocationFromFortress(referenceLocation));
+		}
+		
+		/**
+		 * Determines the minimum number of moves necessary to reach the fortress from the given location.
+		 * @param location The location for which to determine the distance.
+		 * @return The number of moves separating the location and the closest location inside the fortress.
+		 */
+		public int distanceOfLocationFromFortress(Location location)
+		{
+			int distance = InvasionModelConstants.INVASION_BOARD_FORTRESS_DISTANCES[location.getX()][location.getY()];
+			
+			if (distance < 0)
+				throw new RuntimeException("Fortress distance requested for coordinates not on board: (" + location.getX() + ", " + location.getY() + ")");
+			
+			return distance;
 		}
 		
 		/**
