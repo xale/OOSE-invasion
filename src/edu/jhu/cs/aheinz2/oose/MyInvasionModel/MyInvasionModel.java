@@ -245,7 +245,7 @@ public class MyInvasionModel implements InvasionModel
 			// Check that the destination location exists, and is empty
 			if (!this.locationIsOnBoard(toLocation))
 				throw new IllegalMoveException("You cannot move off of the board");
-			if (this.contents[toLocation.getX()][toLocation.getY()] != null)
+			if (this.getPieceAtLocation(toLocation) != null)
 				throw new IllegalMoveException("You cannot move to an occupied location");
 			
 			// If the player controls the pirates, check that the move does not place the piece further away
@@ -290,7 +290,7 @@ public class MyInvasionModel implements InvasionModel
 						}
 						
 						// Check if the location contains a pirate piece
-						MyInvasionPiece opponentPiece = this.contents[jumpedLocation.getX()][jumpedLocation.getY()];
+						MyInvasionPiece opponentPiece = this.getPieceAtLocation(jumpedLocation);
 						if (opponentPiece != null)
 						{
 							if (opponentPiece.getOwner().equals(Player.PIRATE))
@@ -409,7 +409,7 @@ public class MyInvasionModel implements InvasionModel
 			// Check for diagonal moves
 			for (Location newLocation : this.diagonals.get(oldLocation))
 			{
-				if ((this.contents[newLocation.getX()][newLocation.getY()] == null) && !(isPirate && this.locationIsFurtherFromFortress(newLocation, oldLocation)))
+				if ((this.getPieceAtLocation(newLocation) == null) && !(isPirate && this.locationIsFurtherFromFortress(newLocation, oldLocation)))
 					return true;
 			}
 			
@@ -433,12 +433,12 @@ public class MyInvasionModel implements InvasionModel
 				for (Location newLocation : this.diagonals.get(oldLocation))
 				{
 					// Check if there are any diagonally-adjacent pirates
-					MyInvasionPiece piece = contents[newLocation.getX()][newLocation.getY()];
+					MyInvasionPiece piece = this.getPieceAtLocation(newLocation);
 					if ((piece != null) && (piece.getOwner().equals(Player.PIRATE)))
 					{
 						// Check that the location on the other side of the pirate exists and is unoccupied
 						Location jumpDestination = new Location((x + (newLocation.getX() - x)), (y + (newLocation.getX() - y)));
-						if (this.diagonals.get(newLocation).contains(jumpDestination) && (this.contents[jumpDestination.getX()][jumpDestination.getY()] == null))
+						if (this.diagonals.get(newLocation).contains(jumpDestination) && (this.getPieceAtLocation(jumpDestination) == null))
 							return true;
 					}
 				}
@@ -451,7 +451,7 @@ public class MyInvasionModel implements InvasionModel
 		 * Determines if a new location is further from the fortress than a reference location.
 		 * @param newLocation The new location.
 		 * @param referenceLocation The reference location.
-		 * @return True if newLocation is close to the fortress than fromLocation, false otherwise. 
+		 * @return True if newLocation is closer to the fortress than fromLocation, false otherwise.
 		 */
 		private boolean locationIsFurtherFromFortress(Location newLocation, Location referenceLocation)
 		{
