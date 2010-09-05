@@ -33,12 +33,15 @@ public class MyInvasionModel implements InvasionModel
 	public void move(Location fromLocation, Location toLocation) throws IllegalMoveException
 	{
 		// Check that the piece being moved is owned by the current player
-		if (!this.getPieceOwner(fromLocation).equals(this.currentPlayer))
-			throw new IllegalMoveException("You cannot move your opponent's pieces");
+		Player pieceOwner = this.getPieceOwner(fromLocation);
+		if (pieceOwner == null)
+			throw new IllegalMoveException("No piece selected");
+		if (!pieceOwner.equals(this.currentPlayer))
+			throw new IllegalMoveException("You must move your own pieces");
 		
 		// TODO: move piece
 		
-		// Make note that the player has made a move
+		// Make note that the current player has made a move
 		this.currentPlayerHasMoved = true;
 		
 		// TODO: check for end-of-game
@@ -107,8 +110,8 @@ public class MyInvasionModel implements InvasionModel
 		}
 		catch (IllegalMoveException illegalMove)
 		{
-			// Indicates that the location is invalid; the interface provides no way to handle this, so we must ignore it and return null
-			return null;
+			// Indicates that the location is invalid; the interface is not supposed to request this
+			throw new RuntimeException(illegalMove);
 		}
 		
 		// If there is a piece at the location, return the piece's owner
@@ -180,7 +183,7 @@ public class MyInvasionModel implements InvasionModel
 			// Set up the pirates pieces
 			for (int x = 0; x < InvasionModelConstants.INVASION_BOARD_WIDTH; x++)
 			{
-				for (int y = 0; y <= InvasionModelConstants.INVASION_BOARD_NUM_PIRATE_OCCUPIED_ROWS; y++)
+				for (int y = 0; y < InvasionModelConstants.INVASION_BOARD_NUM_PIRATE_OCCUPIED_ROWS; y++)
 				{
 					if (this.coordinatesAreOnBoard(x, y))
 						this.contents[x][y] = new MyInvasionPiece(Player.PIRATE);
@@ -261,7 +264,7 @@ public class MyInvasionModel implements InvasionModel
 		 * @param y The y-coordinate of the piece.
 		 * @return True if the piece can be moved (or can jump) in at least one direction, false otherwise.
 		 */
-		// TODO: clean this method up
+		// TODO: cleanup
 		private boolean playerCanMovePieceAtCoordinates(Player pieceOwner, int x, int y)
 		{
 			// Determine if the player controls the pirates
@@ -292,7 +295,7 @@ public class MyInvasionModel implements InvasionModel
 			}
 			
 			// If the player controls the bulgars, check for legal jumps
-			if (!isPirate)
+			if (pieceOwner.equals(Player.BULGAR))
 			{
 				// Left
 				if (this.coordinatesAreOnBoard((x - 2), y) && (this.contents[(x - 2)][y] == null) && (this.contents[(x - 1)][y] != null) && (this.contents[(x - 1)][y].getOwner().equals(Player.PIRATE)))
