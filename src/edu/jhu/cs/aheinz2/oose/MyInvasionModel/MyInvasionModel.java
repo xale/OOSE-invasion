@@ -103,16 +103,9 @@ public class MyInvasionModel implements InvasionModel
 	public Player getPieceOwner(Location location)
 	{
 		MyInvasionPiece piece = null;
-		try
-		{
-			// Check if there is a piece at the specified location
-			piece = this.board.getPieceAtLocation(location);
-		}
-		catch (IllegalMoveException illegalMove)
-		{
-			// Indicates that the location is invalid; the interface is not supposed to request this
-			throw new RuntimeException(illegalMove);
-		}
+		
+		// Check if there is a piece at the specified location
+		piece = this.board.getPieceAtLocation(location);
 		
 		// If there is a piece at the location, return the piece's owner
 		if (piece != null)
@@ -343,9 +336,8 @@ public class MyInvasionModel implements InvasionModel
 		/**
 		 * Returns the piece at the specified Location.
 		 * @return The piece at the specified location on the board, if present, or null.
-		 * @throw IllegalMoveException If the specified location lies beyond the bounds of the board.
 		 */
-		public MyInvasionPiece getPieceAtLocation(Location location) throws IllegalMoveException
+		public MyInvasionPiece getPieceAtLocation(Location location)
 		{
 			return this.getPieceAtCoordinates(location.getX(), location.getY());
 		}
@@ -355,13 +347,12 @@ public class MyInvasionModel implements InvasionModel
 		 * @param x The x-coordinate of the piece.
 		 * @param y The y-coordinate of the piece.
 		 * @return The piece at (x, y) on the board, or null.
-		 * @throws IllegalMoveException If the specified coordinates lie beyond the bounds of the board.
 		 */
-		private MyInvasionPiece getPieceAtCoordinates(int x, int y) throws IllegalMoveException
+		private MyInvasionPiece getPieceAtCoordinates(int x, int y)
 		{
 			// Check if the coordinates are valid (i.e., on the board)
 			if (!this.coordinatesAreOnBoard(x, y))
-				throw new IllegalMoveException("Location is not on the board");
+				throw new RuntimeException("Piece requested at coordinates not on board: (" + x + ", " + y + ")");
 			
 			// Return the contents of the board at the specified coordinates
 			return this.contents[x][y];
