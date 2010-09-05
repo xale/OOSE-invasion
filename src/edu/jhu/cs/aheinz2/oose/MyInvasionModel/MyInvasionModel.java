@@ -22,6 +22,8 @@ public class MyInvasionModel implements InvasionModel
 	private MyInvasionBoard board = new MyInvasionBoard();
 	private Player currentPlayer = Player.PIRATE;	// Pirates play first
 	private boolean currentPlayerHasMoved = false;
+	private boolean currentPlayerHasJumped = false;
+	private Location lastJumpDestiation = null;
 	private Player winningPlayer = null;
 	
 	private Set<InvasionModelListener> listeners = new HashSet<InvasionModelListener>();
@@ -39,11 +41,162 @@ public class MyInvasionModel implements InvasionModel
 		if (!pieceOwner.equals(this.currentPlayer))
 			throw new IllegalMoveException("You must move your own pieces");
 		
-		// Attempt to move the piece (invalid moves will throw an exception)
+		// Check the distance being moved, to determine if this is a move or a jump
+		int dx = (toLocation.getX() - fromLocation.getX());
+		int dy = (toLocation.getY() - fromLocation.getY());
+		Location jumpedLocation = null;
+		
+		switch (Math.max(Math.abs(dx), Math.abs(dy)))
+		{
+			case 0:
+				// I doubt the view/controller could ever hand us this, but just in case
+				throw new IllegalMoveException("Not a move");
+			
+			case 1:
+				// If the total distance moved is one location, evaluate this as a "move"
+				// A move is valid if:
+				// - the player has not already moved or jumped, and
+				// - the destination is on the board, and
+				// - the locations are connected on the board, and
+				// - the destination is not occupied, and
+				// - if the player controls the pirates, the piece is not being moved away from the fortress, and
+				// - if the player controls the bulgars, no jumps are possible
+				
+				// Check if the player has already moved
+				if (this.currentPlayerHasMoved)
+					throw new IllegalMoveException("You may not move twice in one turn");
+				
+				// Check if the player has jumped a piece
+				if (this.currentPlayerHasJumped)
+					throw new IllegalMoveException("You may not make a non-jump move after a jump");
+				
+				// Check that the destination is on the board
+				if (!this.board.locationIsOnBoard(toLocation))
+					throw new IllegalMoveException("You cannot move off of the board");
+				
+				// Check if the locations are connected
+				if (!this.board.locationsAreConnected(fromLocation, toLocation))
+					throw new IllegalMoveException("Piece cannot reach that location");
+				
+				// Check if the destination is occupied
+				if (this.board.getPieceAtLocation(toLocation) != null)
+					throw new IllegalMoveException("That location is already occupied");
+				
+				// Check if a pirate is being moved away from the fortress
+				if (this.currentPlayer.equals(Player.PIRATE) && this.board.locationIsFurtherFromFortress(toLocation, fromLocation))
+					throw new IllegalMoveException("You may not move pirates away from the fortress");
+				
+				// Check if the player has valid jumps (always returns false if the player controls the pirates)
+				if (this.board.playerHasLegalJumps(this.currentPlayer))
+					throw new IllegalMoveException("You cannot move when a jump is possible");
+				
+				// Valid move
+				break;
+				
+			case 2:
+				// If the total distance is two, evaluate this as a "jump"
+				// A jump is valid if:
+				// - the player controls the bulgars, and
+				// - the player has not already moved, and
+				// - if the player has already jumped, the same piece is being used for this jump, and
+				// - the destination is on the board, and
+				// - the origin, and destination lie in a straight horizontal, vertical, or 45¡ diagonal line, and
+				// - the origin is connected to the jumped location, and
+				// - the jumped location is connected to the destination, and
+				// - the jumped location contains a pirate, and
+				// - the destination location is not occupied
+				
+				// Check if the player controls the bulgars
+				if (!this.currentPlayer.equals(Player.BULGAR))
+					throw new IllegalMoveException("Piece cannot reach that location");
+				
+				// Check if the player has already moved
+				if (this.currentPlayerHasMoved)
+					throw new IllegalMoveException("You may not move twice in one turn");
+				
+				// Check that if the player has already jumped, he or she is using the same piece for this jump
+				if (this.currentPlayerHasJumped && !this.lastJumpDestiation.equals(fromLocation))
+					throw new IllegalMoveException("You may not move two different pieces in one turn");
+				
+				// Check that the destination is on the board
+				if (!this.board.locationIsOnBoard(toLocation))
+					throw new IllegalMoveException("You cannot move off of the board");
+				
+				// Determine the direction in which the piece is attempting to jump
+				int dHoriz = 0;
+				int dVert = 0;
+				
+				// Horizontal
+				if (dy == 0)
+				{
+					// Determine left/right direction
+					dHoriz = ((dx > 0) ? 1 : -1);
+				}
+				// Vertical
+				else if (dx == 0)
+				{
+					// Determine up/down direction (note inverted coordinate system)
+					dVert = ((dy > 0) ? 1 : -1);
+				}
+				// Diagonal
+				else if (Math.abs(dx) == Math.abs(dy))
+				{
+					// Determine horizontal and vertical directions
+					dHoriz = ((dx > 0) ? 1 : -1);
+					dVert = ((dy > 0) ? 1 : -1);
+				}
+				else
+				{
+					// (Anything else is not a straight line)
+					throw new IllegalMoveException("Piece cannot reach that location");
+				}
+				
+				// Determine the location being jumped over
+				jumpedLocation = new Location((fromLocation.getX() + dHoriz), (fromLocation.getY() + dVert));
+				
+				// Check that the origin is connected to the jumped location
+				if (!this.board.locationsAreConnected(fromLocation, jumpedLocation))
+					throw new IllegalMoveException("Piece cannot reach that location");
+				
+				// Check that the jumped location is connected to the destination
+				// NOTE: I'm not sure its actually possible for the previous check to succeed and this to fail; this is just for safety
+				if (!this.board.locationsAreConnected(jumpedLocation, toLocation))
+					throw new IllegalMoveException("Piece cannot reach that location");
+				
+				// Check if the jumped location contains a piece
+				if (this.board.getPieceAtLocation(jumpedLocation) == null)
+					throw new IllegalMoveException("Piece cannot reach that location");
+				
+				// Check that the jumped piece is a pirate
+				if (!this.getPieceOwner(jumpedLocation).equals(Player.PIRATE))
+					throw new IllegalMoveException("You cannot jump your own pieces"); 
+				
+				// Check if the destination is occupied
+				if (this.board.getPieceAtLocation(toLocation) != null)
+					throw new IllegalMoveException("That location is already occupied");
+				
+				// Valid jump
+				break;
+				
+			default:
+				throw new IllegalMoveException("Piece cannot reach that location");
+		}
+		
+		// Move the piece
 		this.board.movePiece(fromLocation, toLocation);
 		
-		// Make note that the current player has made a move
-		this.currentPlayerHasMoved = true;
+		// If this was a jump, remove the jumped piece and make note
+		if (jumpedLocation != null)
+		{
+			this.board.removePiece(jumpedLocation);
+			this.lastJumpDestiation = toLocation;
+			this.currentPlayerHasJumped = true;
+		}
+		else
+		{
+			// Otherwise, make note that the current player has made a move
+			this.currentPlayerHasMoved = true;
+		}
 		
 		// Check if the game is over
 		this.winningPlayer = this.board.getGameWinner();
@@ -66,12 +219,14 @@ public class MyInvasionModel implements InvasionModel
 	public void endTurn() throws IllegalMoveException
 	{
 		// Check that the player can legally end his or her turn
-		if (this.board.playerHasLegalMoves(this.currentPlayer) && !this.currentPlayerHasMoved)
+		if (!this.currentPlayerHasMoved && !this.currentPlayerHasJumped && this.board.playerHasLegalMoves(this.currentPlayer))
 			throw new IllegalMoveException("You must make a move");
 		
 		// Change the current player
 		this.currentPlayer = this.getNextPlayer();
 		this.currentPlayerHasMoved = false;
+		this.currentPlayerHasJumped = false;
+		this.lastJumpDestiation = null;
 		
 		// Notify listeners of turn change
 		this.sendEvent(new InvasionModelEvent(false, true, false));
@@ -230,134 +385,42 @@ public class MyInvasionModel implements InvasionModel
 		}
 
 		/**
-		 * Attempts to move a piece from the specified location to the specified destination
+		 * Moves a piece from the specified starting location to the specified destination.
 		 * @param fromLocation The current location of the piece to move.
 		 * @param toLocation The destination location for the moved piece.
 		 */
-		// TODO: cleanup
-		public void movePiece(Location fromLocation, Location toLocation) throws IllegalMoveException
+		public void movePiece(Location fromLocation, Location toLocation)
 		{
-			// Check for a piece at the specified location
+			// Get the piece at the origin
 			MyInvasionPiece piece = this.getPieceAtLocation(fromLocation);
-			if (piece == null)
-				throw new IllegalMoveException("You have not selected a piece to move");
 			
-			// Check that the destination location exists, and is empty
-			if (!this.locationIsOnBoard(toLocation))
-				throw new IllegalMoveException("You cannot move off of the board");
-			if (this.getPieceAtLocation(toLocation) != null)
-				throw new IllegalMoveException("You cannot move to an occupied location");
-			
-			// If the player controls the pirates, check that the move does not place the piece further away
-			if (piece.getOwner().equals(Player.PIRATE) && this.locationIsFurtherFromFortress(toLocation, fromLocation))
-				throw new IllegalMoveException("You cannot move your pirates away from the fortress");
-			
-			// Check that the destination is reachable
-			boolean destinationReachable = false;
-			String errorReason = null;
-			Location jumpedLocation = null;
-			
-			// Horizontal/vertical moves
-			if ((fromLocation.getX() == toLocation.getX()) || (fromLocation.getY() == fromLocation.getY()))
-			{
-				// Determine the number of coordinates the piece is moving
-				int moveDistance = Math.max(Math.abs(fromLocation.getX() - toLocation.getX()), Math.abs(fromLocation.getY() - toLocation.getY()));
-				
-				if (moveDistance == 1)
-				{
-					// Piece can move
-					destinationReachable = true;
-				}
-				else if (moveDistance == 2)
-				{
-					// Check if the piece is a bulgar
-					if (piece.getOwner().equals(Player.BULGAR))
-					{
-						// Find the location between the start and destination
-						if (fromLocation.getX() == toLocation.getX())
-						{
-							if (toLocation.getY() > fromLocation.getY())
-								jumpedLocation = new Location(fromLocation.getX(), (fromLocation.getY() + 1));
-							else
-								jumpedLocation = new Location(fromLocation.getX(), (fromLocation.getY() - 1));
-						}
-						else
-						{
-							if (toLocation.getX() > fromLocation.getX())
-								jumpedLocation = new Location((fromLocation.getX() + 1), fromLocation.getY());
-							else
-								jumpedLocation = new Location((fromLocation.getX() - 1), fromLocation.getY());	
-						}
-						
-						// Check if the location contains a pirate piece
-						MyInvasionPiece opponentPiece = this.getPieceAtLocation(jumpedLocation);
-						if (opponentPiece != null)
-						{
-							if (opponentPiece.getOwner().equals(Player.PIRATE))
-							{
-								// Piece can jump
-								destinationReachable = true;
-							}
-							else
-							{
-								// Cannot jump own pieces
-								errorReason = "You may not jump your own pieces";
-							}
-						}
-						else
-						{
-							// No piece to jump
-							errorReason = "Pieces may not move more than one step";
-						}
-					}
-					else
-					{
-						// Pirates may not attempt to jump
-						errorReason = "Pieces may not move more than one step";
-					}
-				}
-				else
-				{
-					// Piece cannot move more than one step at a time
-					errorReason = "Pieces may not move more than one step";
-				}
-			}
-			// Diagonal moves
-			else if (Math.abs(fromLocation.getX() - toLocation.getX()) == Math.abs(fromLocation.getY() - toLocation.getY()))
-			{
-				// TODO: WRITEME
-			}
-			// Indirect move (not horizontal, vertical or diagonal)
-			else
-			{
-				// Cannot move in any other directions
-				errorReason = "Pieces may not move more than one step";
-			}
-			
-			// Check if the destination is unreachable
-			if (!destinationReachable)
-				throw new IllegalMoveException(errorReason);
-			
-			// Otherwise, perform the move
+			// Remove the piece from the origin
 			this.contents[fromLocation.getX()][fromLocation.getY()] = null;
-			this.contents[toLocation.getX()][toLocation.getY()] = piece;
 			
-			// If the move was a jump, removed the jumped piece
-			if (jumpedLocation != null)
-				this.contents[jumpedLocation.getX()][jumpedLocation.getY()] = null;
+			// Place it at the destination
+			this.contents[toLocation.getX()][toLocation.getY()] = piece;
 		}
 
 		/**
+		 * Removes a (jumped/captured) piece from the board.
+		 * @param pieceLocation The location of the piece to remove.
+		 */
+		public void removePiece(Location pieceLocation)
+		{
+			this.contents[pieceLocation.getX()][pieceLocation.getY()] = null;
+		}
+		
+		/**
 		 * Determines if the specified player can legally move a piece on the field.
 		 * @param player The player attempting to move.
-		 * @return True if the player has at least one legal move, false otherwise.
+		 * @return True if the player has at least one legal move (or jump), false otherwise.
 		 */
 		public boolean playerHasLegalMoves(Player player)
 		{
 			// Iterate over the board, looking for the player's pieces
 			for (int x = 0; x < InvasionModelConstants.INVASION_BOARD_WIDTH; x++)
 			{
-				for (int y = 0; x < InvasionModelConstants.INVASION_BOARD_HEIGHT; y++)
+				for (int y = 0; y < InvasionModelConstants.INVASION_BOARD_HEIGHT; y++)
 				{
 					// Check that these coordinates are on the board
 					if (this.coordinatesAreOnBoard(x, y))
@@ -378,71 +441,196 @@ public class MyInvasionModel implements InvasionModel
 		}
 		
 		/**
+		 * Determines if the specified player owns any pieces that can perform at least valid jump.
+		 * @param player The player attempting to jump.
+		 * @return True if the player controls the bulgars, and at least one bulgar piece can make at least one jump/capture; false otherwise.
+		 */
+		public boolean playerHasLegalJumps(Player player)
+		{
+			// If the player controls the pirates, he or she cannot possibly make any jumps
+			if (player.equals(Player.PIRATE))
+				return false;
+			
+			// Search the board for bulgar pieces
+			for (int x = 0; x < InvasionModelConstants.INVASION_BOARD_WIDTH; x++)
+			{
+				for (int y = 0; y < InvasionModelConstants.INVASION_BOARD_HEIGHT; y++)
+				{
+					// Check that these coordinates are on the board
+					if (this.coordinatesAreOnBoard(x, y))
+					{
+						// Determine if these coordinates contain a bulgar
+						MyInvasionPiece piece = this.getPieceAtCoordinates(x, y);
+						if ((piece != null) && piece.getOwner().equals(player))
+						{
+							// Check if the piece can perform a jump
+							if (this.pieceAtCoordinatesHasLegalJumps(x, y))
+								return true;
+						}
+					}
+				}
+			}
+			
+			return false;
+		}
+		
+		/**
 		 * Determines if a piece at the specified coordinates, owned by the specified player, can be moved.
 		 * @param pieceOwner The piece's owner.
 		 * @param x The x-coordinate of the piece.
 		 * @param y The y-coordinate of the piece.
 		 * @return True if the piece can be moved (or can jump) in at least one direction, false otherwise.
 		 */
-		// TODO: cleanup
 		private boolean playerCanMovePieceAtCoordinates(Player pieceOwner, int x, int y)
 		{
-			// Determine if the player controls the pirates
-			boolean isPirate = pieceOwner.equals(Player.PIRATE);
-			
 			Location oldLocation = new Location(x, y);
+			Location[] adjacentLocations =
+			{
+				new Location((x - 1), y),	// Left
+				new Location((x + 1), y),	// Right
+				new Location(x, (y + 1)),	// Down
+				new Location(x, (y - 1))	// Up
+			};
 			
-			// Check each possible direction of horizontal or vertical movement
-			// Left
-			if (this.coordinatesAreOnBoard((x - 1), y) && (this.contents[(x - 1)][y] == null) && !(isPirate && this.locationIsFurtherFromFortress(new Location((x - 1), y), oldLocation)))
+			// Test each direction of horizontal or vertical movement
+			for (Location newLocation : adjacentLocations)
+			{
+				// Check that the location exists
+				if (!this.locationIsOnBoard(newLocation))
+					continue;
+				
+				// Check that the location is unoccupied
+				if (this.getPieceAtLocation(newLocation) != null)
+					continue;
+					
+				// Check if the move would require a pirate to move away from the fortress
+				if ((pieceOwner.equals(Player.PIRATE) && this.locationIsFurtherFromFortress(newLocation, oldLocation)))
+					continue;
+				
+				// Valid location for move
 				return true;
-			// Right
-			if (this.coordinatesAreOnBoard((x + 1), y) && (this.contents[(x + 1)][y] == null) && !(isPirate && this.locationIsFurtherFromFortress(new Location((x + 1), y), oldLocation)))
-				return true;
-			// Down
-			if (this.coordinatesAreOnBoard(x, (y + 1)) && (this.contents[x][(y + 1)] == null) && !(isPirate && this.locationIsFurtherFromFortress(new Location(x, (y + 1)), oldLocation)))
-				return true;
-			// Up
-			if (this.coordinatesAreOnBoard(x, (y - 1)) && (this.contents[x][(y - 1)] == null) && !(isPirate && this.locationIsFurtherFromFortress(new Location(x, (y - 1)), oldLocation)))
-				return true;
+			}
 			
 			// Check for diagonal moves
 			for (Location newLocation : this.diagonals.get(oldLocation))
 			{
-				if ((this.getPieceAtLocation(newLocation) == null) && !(isPirate && this.locationIsFurtherFromFortress(newLocation, oldLocation)))
+				// Check that the location is unoccupied
+				if (this.getPieceAtLocation(newLocation) != null)
+					continue;
+						
+				// Check if the move would require a pirate to move away from the fortress
+				if ((pieceOwner.equals(Player.PIRATE) && this.locationIsFurtherFromFortress(newLocation, oldLocation)))
+					continue;
+				
+				// Valid location for move
+				return true;
+			}
+			
+			// If the piece is a bulgar, check for legal jumps
+			if (pieceOwner.equals(Player.BULGAR))
+			{
+				if (this.pieceAtCoordinatesHasLegalJumps(x, y))
 					return true;
 			}
 			
-			// If the player controls the bulgars, check for legal jumps
-			if (pieceOwner.equals(Player.BULGAR))
+			return false;
+		}
+		
+		/**
+		 * Determines if the piece at the specified coordinates (assumed to be a bulgar) can make at least one valid jump.
+		 * @param x The x-coordinate of the piece.
+		 * @param y The y-coordinate of the piece.
+		 * @return True if the piece can jump over at least one pirate piece, false otherwise.
+		 */
+		private boolean pieceAtCoordinatesHasLegalJumps(int x, int y)
+		{
+			Location oldLocation = new Location(x, y);
+			Location[][] jumps =
 			{
-				// Left
-				if (this.coordinatesAreOnBoard((x - 2), y) && (this.contents[(x - 2)][y] == null) && (this.contents[(x - 1)][y] != null) && (this.contents[(x - 1)][y].getOwner().equals(Player.PIRATE)))
-					return true;
-				// Right
-				if (this.coordinatesAreOnBoard((x + 2), y) && (this.contents[(x + 2)][y] == null) && (this.contents[(x + 1)][y] != null) && (this.contents[(x + 1)][y].getOwner().equals(Player.PIRATE)))
-					return true;
-				// Up
-				if (this.coordinatesAreOnBoard(x, (y - 2)) && (this.contents[x][(y - 2)] == null) && (this.contents[x][(y - 1)] != null) && (this.contents[x][(y - 1)].getOwner().equals(Player.PIRATE)))
-					return true;
-				// Down
-				if (this.coordinatesAreOnBoard(x, (y + 2)) && (this.contents[x][(y + 2)] == null) && (this.contents[x][(y + 1)] != null) && (this.contents[x][(y + 1)].getOwner().equals(Player.PIRATE)))
-					return true;
+				{new Location((x - 1), y), new Location((x - 2), y)},	// Left
+				{new Location((x + 1), y), new Location((x + 2), y)},	// Right
+				{new Location(x, (y - 1)), new Location(x, (y - 2))},	// Up
+				{new Location(x, (y + 1)), new Location(x, (y + 2))}	// Down
+			};
+			
+			// Check for possible horizontal or vertical jumps
+			for (Location[] jump : jumps)
+			{
+				// Check that the location to jump over exists
+				if (!this.locationIsOnBoard(jump[0]))
+					continue;
 				
-				// Check for diagonal jumps
-				for (Location newLocation : this.diagonals.get(oldLocation))
+				// Check that the location to jump to exists, and is unoccupied
+				if (!this.locationIsOnBoard(jump[1]) || (this.getPieceAtLocation(jump[1]) != null))
+					continue;
+				
+				// Check that the location to jump over contains a pirate piece
+				MyInvasionPiece jumpedPiece = this.getPieceAtLocation(jump[0]);
+				if ((jumpedPiece == null) || !jumpedPiece.getOwner().equals(Player.PIRATE))
+					continue;
+				
+				// Valid direction for a jump
+				return true;
+			}
+			
+			// Check for diagonal jumps
+			for (Location jumpedLocation : this.diagonals.get(oldLocation))
+			{
+				// Check if there are any diagonally-adjacent pirates
+				MyInvasionPiece piece = this.getPieceAtLocation(jumpedLocation);
+				if ((piece != null) && (piece.getOwner().equals(Player.PIRATE)))
 				{
-					// Check if there are any diagonally-adjacent pirates
-					MyInvasionPiece piece = this.getPieceAtLocation(newLocation);
-					if ((piece != null) && (piece.getOwner().equals(Player.PIRATE)))
-					{
-						// Check that the location on the other side of the pirate exists and is unoccupied
-						Location jumpDestination = new Location((x + (newLocation.getX() - x)), (y + (newLocation.getX() - y)));
-						if (this.diagonals.get(newLocation).contains(jumpDestination) && (this.getPieceAtLocation(jumpDestination) == null))
-							return true;
-					}
+					// Check that the location to jump to exists, and is unoccupied
+					Location jumpDestination = new Location((x + (jumpedLocation.getX() - x)), (y + (jumpedLocation.getX() - y)));
+					if (!this.locationIsOnBoard(jumpDestination) || (this.getPieceAtLocation(jumpDestination) != null))
+						continue;
+					
+					// Check that the location to jump is reachable from the jumped location 
+					if (!this.locationsAreConnected(jumpedLocation, jumpDestination))
+						continue;
+					
+					// Valid direction for a jump
+					return true;
 				}
 			}
+			
+			return false;
+		}
+		
+		/**
+		 * Checks the board to see if one of the players has reached a victory condition.
+		 * @return Player.BULGAR if there are fewer than nine pirates on the board, Player.PIRATE if the fortress is occupied by pirates, or null otherwise.
+		 */
+		public Player getGameWinner()
+		{
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+		/**
+		 * Determines if two locations are adjacent and connected by a line on the board.
+		 * NOTE: This method is technically direction-sensitive; it tests if a is connected to b, and not vice-versa, but this should be invertible for all locations on the board.
+		 * @param a	The first of the two locations to test.
+		 * @param b The second of the two locations to test.
+		 * @return True if a is connected to b, false otherwise.
+		 */
+		public boolean locationsAreConnected(Location a, Location b)
+		{
+			// Test if either of the locations is not on the board
+			if (!this.locationIsOnBoard(a) || !this.locationIsOnBoard(b))
+				return false;
+			
+			// Test if the locations are adjacent horizontally
+			if ((a.getY() == b.getY()) && (Math.abs(a.getX() - b.getX()) == 1))
+				return true;
+			
+			// Test if the locations are adjacent vertically
+			if ((a.getX() == b.getX()) && (Math.abs(a.getY() - b.getY()) == 1))
+				return true;
+			
+			// Test if the locations are connected diagonally
+			if (this.diagonals.get(a).contains(b))
+				return true;
 			
 			return false;
 		}
@@ -453,7 +641,7 @@ public class MyInvasionModel implements InvasionModel
 		 * @param referenceLocation The reference location.
 		 * @return True if newLocation is closer to the fortress than fromLocation, false otherwise.
 		 */
-		private boolean locationIsFurtherFromFortress(Location newLocation, Location referenceLocation)
+		public boolean locationIsFurtherFromFortress(Location newLocation, Location referenceLocation)
 		{
 			return (this.distanceOfLocationFromFortress(newLocation) > this.distanceOfLocationFromFortress(referenceLocation));
 		}
@@ -536,16 +724,6 @@ public class MyInvasionModel implements InvasionModel
 			
 			// Valid location
 			return true;
-		}
-		
-		/**
-		 * Checks the board to see if one of the players has reached a victory condition.
-		 * @return Player.BULGAR if there are fewer than nine pirates on the board, Player.PIRATE if the fortress is occupied by pirates, or null otherwise.
-		 */
-		public Player getGameWinner()
-		{
-			// TODO Auto-generated method stub
-			return null;
 		}
 	}
 	
