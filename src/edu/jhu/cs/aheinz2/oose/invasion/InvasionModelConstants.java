@@ -6,7 +6,7 @@
  *
  * 
  */
-package edu.jhu.cs.aheinz2.oose.MyInvasionModel;
+package edu.jhu.cs.aheinz2.oose.invasion;
 
 import edu.jhu.cs.oose.fall2010.invasion.iface.Location;
 

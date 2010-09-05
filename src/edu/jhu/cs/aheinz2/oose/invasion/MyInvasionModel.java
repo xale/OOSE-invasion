@@ -7,7 +7,7 @@
  * InvasionModel-conforming model object implementation
  */
 
-package edu.jhu.cs.aheinz2.oose.MyInvasionModel;
+package edu.jhu.cs.aheinz2.oose.invasion;
 
 import java.util.*;
 
