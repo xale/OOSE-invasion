@@ -22,7 +22,6 @@ public class MyInvasionModel implements InvasionModel
 {
 	private MyInvasionBoard board = new MyInvasionBoard();
 	private Player currentPlayer = Player.PIRATE;	// Pirates play first
-	private boolean currentPlayerHasMoved = false;
 	private boolean currentPlayerHasJumped = false;
 	private Location lastJumpDestination = null;
 	private Player winningPlayer = null;
@@ -55,16 +54,12 @@ public class MyInvasionModel implements InvasionModel
 			case 1:
 				// If the total distance moved is one location, evaluate this as a "move"
 				// A move is valid if:
-				// - the player has not already moved or jumped, and
+				// - the player has not already jumped, and
 				// - the destination is on the board, and
 				// - the locations are connected on the board, and
 				// - the destination is not occupied, and
 				// - if the player controls the pirates, the piece is not being moved away from the fortress, and
 				// - if the player controls the bulgars, no jumps are possible
-				
-				// Check if the player has already moved
-				if (this.currentPlayerHasMoved)
-					throw new IllegalMoveException("You may not move twice in one turn!");
 				
 				// Check if the player has jumped a piece
 				if (this.currentPlayerHasJumped)
@@ -97,7 +92,6 @@ public class MyInvasionModel implements InvasionModel
 				// If the total distance is two, evaluate this as a "jump"
 				// A jump is valid if:
 				// - the player controls the bulgars, and
-				// - the player has not already moved, and
 				// - if the player has already jumped, the same piece is being used for this jump, and
 				// - the destination is on the board, and
 				// - the origin, and destination lie in a straight horizontal, vertical, or 45¡ diagonal line, and
@@ -109,10 +103,6 @@ public class MyInvasionModel implements InvasionModel
 				// Check if the player controls the bulgars
 				if (!this.currentPlayer.equals(Player.BULGAR))
 					throw new IllegalMoveException("Piece cannot reach that location!");
-				
-				// Check if the player has already moved
-				if (this.currentPlayerHasMoved)
-					throw new IllegalMoveException("You may not move twice in one turn!");
 				
 				// Check that if the player has already jumped, he or she is using the same piece for this jump
 				if (this.currentPlayerHasJumped && !this.lastJumpDestination.equals(fromLocation))
@@ -191,11 +181,6 @@ public class MyInvasionModel implements InvasionModel
 			this.lastJumpDestination = toLocation;
 			this.currentPlayerHasJumped = true;
 		}
-		else
-		{
-			// Otherwise, make note that the current player has made a move
-			this.currentPlayerHasMoved = true;
-		}
 		
 		// Check if the game is over
 		this.winningPlayer = this.board.getGameWinner();
@@ -204,9 +189,18 @@ public class MyInvasionModel implements InvasionModel
 			// Notify listeners of the end of the game
 			this.sendEvent(new InvasionModelEvent(true, false, true));
 		}
+		// Check whether to end the turn
+		else if (!(this.currentPlayerHasJumped && this.board.playerHasLegalJumps(this.currentPlayer)))
+		{
+			// Change the current player
+			this.swapCurrentPlayer();
+			
+			// Notify listeners of moved piece(s) and end of turn
+			this.sendEvent(new InvasionModelEvent(true, true, false));
+		}
 		else
 		{
-			// Notify listeners of moved piece
+			// Notify listeners of moved piece(s), but do not end the turn
 			this.sendEvent(new InvasionModelEvent(true, false, false));
 		}
 	}
@@ -218,17 +212,24 @@ public class MyInvasionModel implements InvasionModel
 	public void endTurn() throws IllegalMoveException
 	{
 		// Check that the player can legally end his or her turn
-		if (!this.currentPlayerHasMoved && !this.currentPlayerHasJumped && this.board.playerHasLegalMoves(this.currentPlayer))
+		if (!this.currentPlayerHasJumped && this.board.playerHasLegalMoves(this.currentPlayer))
 			throw new IllegalMoveException("You must make a move!");
 		
 		// Change the current player
-		this.currentPlayer = this.getNextPlayer();
-		this.currentPlayerHasMoved = false;
-		this.currentPlayerHasJumped = false;
-		this.lastJumpDestination = null;
+		this.swapCurrentPlayer();
 		
 		// Notify listeners of turn change
 		this.sendEvent(new InvasionModelEvent(false, true, false));
+	}
+	
+	/**
+	 * At the end of a turn, changes out which player is playing, and resets all "turn-local" state.
+	 */
+	private void swapCurrentPlayer()
+	{
+		this.currentPlayer = this.getNextPlayer();
+		this.currentPlayerHasJumped = false;
+		this.lastJumpDestination = null;
 	}
 	
 	/* (non-Javadoc)
