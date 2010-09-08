@@ -37,9 +37,9 @@ public class MyInvasionModel implements InvasionModel
 		// Check that the piece being moved is owned by the current player
 		Player pieceOwner = this.getPieceOwner(fromLocation);
 		if (pieceOwner == null)
-			throw new IllegalMoveException("No piece selected");
+			throw new IllegalMoveException("No piece selected!");
 		if (!pieceOwner.equals(this.currentPlayer))
-			throw new IllegalMoveException("You must move your own pieces");
+			throw new IllegalMoveException("You must move your own pieces!");
 		
 		// Check the distance being moved, to determine if this is a move or a jump
 		int dx = (toLocation.getX() - fromLocation.getX());
@@ -50,7 +50,7 @@ public class MyInvasionModel implements InvasionModel
 		{
 			case 0:
 				// I doubt the view/controller could ever hand us this, but just in case
-				throw new IllegalMoveException("Not a move");
+				throw new IllegalMoveException("Not a move!");
 			
 			case 1:
 				// If the total distance moved is one location, evaluate this as a "move"
@@ -68,27 +68,27 @@ public class MyInvasionModel implements InvasionModel
 				
 				// Check if the player has jumped a piece
 				if (this.currentPlayerHasJumped)
-					throw new IllegalMoveException("You may not make a non-jump move after a jump");
+					throw new IllegalMoveException("You may not make a non-jump move after a jump!");
 				
 				// Check that the destination is on the board
 				if (!this.board.locationIsOnBoard(toLocation))
-					throw new IllegalMoveException("You cannot move off of the board");
+					throw new IllegalMoveException("You cannot move off of the board!");
 				
 				// Check if the locations are connected
 				if (!this.board.locationsAreConnected(fromLocation, toLocation))
-					throw new IllegalMoveException("Piece cannot reach that location");
+					throw new IllegalMoveException("Piece cannot reach that location!");
 				
 				// Check if the destination is occupied
 				if (this.board.getPieceAtLocation(toLocation) != null)
-					throw new IllegalMoveException("That location is already occupied");
+					throw new IllegalMoveException("That location is already occupied!");
 				
 				// Check if a pirate is being moved away from the fortress
 				if (this.currentPlayer.equals(Player.PIRATE) && this.board.locationIsFurtherFromFortress(toLocation, fromLocation))
-					throw new IllegalMoveException("You may not move pirates away from the fortress");
+					throw new IllegalMoveException("You may not move pirates away from the fortress!");
 				
 				// Check if the player has valid jumps (always returns false if the player controls the pirates)
 				if (this.board.playerHasLegalJumps(this.currentPlayer))
-					throw new IllegalMoveException("You cannot move when a jump is possible");
+					throw new IllegalMoveException("You cannot move when a jump is possible!");
 				
 				// Valid move
 				break;
@@ -116,11 +116,11 @@ public class MyInvasionModel implements InvasionModel
 				
 				// Check that if the player has already jumped, he or she is using the same piece for this jump
 				if (this.currentPlayerHasJumped && !this.lastJumpDestination.equals(fromLocation))
-					throw new IllegalMoveException("You may not move two different pieces in one turn");
+					throw new IllegalMoveException("You may not move two different pieces in one turn!");
 				
 				// Check that the destination is on the board
 				if (!this.board.locationIsOnBoard(toLocation))
-					throw new IllegalMoveException("You cannot move off of the board");
+					throw new IllegalMoveException("You cannot move off of the board!");
 				
 				// Determine the direction in which the piece is attempting to jump
 				int dHoriz = 0;
@@ -148,7 +148,7 @@ public class MyInvasionModel implements InvasionModel
 				else
 				{
 					// (Anything else is not a straight line)
-					throw new IllegalMoveException("Piece cannot reach that location");
+					throw new IllegalMoveException("Piece cannot reach that location!");
 				}
 				
 				// Determine the location being jumped over
@@ -156,30 +156,30 @@ public class MyInvasionModel implements InvasionModel
 				
 				// Check that the origin is connected to the jumped location
 				if (!this.board.locationsAreConnected(fromLocation, jumpedLocation))
-					throw new IllegalMoveException("Piece cannot reach that location");
+					throw new IllegalMoveException("Piece cannot reach that location!");
 				
 				// Check that the jumped location is connected to the destination
 				// NOTE: I'm not sure its actually possible for the previous check to succeed and this to fail; this is just for safety
 				if (!this.board.locationsAreConnected(jumpedLocation, toLocation))
-					throw new IllegalMoveException("Piece cannot reach that location");
+					throw new IllegalMoveException("Piece cannot reach that location!");
 				
 				// Check if the jumped location contains a piece
 				if (this.board.getPieceAtLocation(jumpedLocation) == null)
-					throw new IllegalMoveException("Piece cannot reach that location");
+					throw new IllegalMoveException("Piece cannot reach that location!");
 				
 				// Check that the jumped piece is a pirate
 				if (!this.getPieceOwner(jumpedLocation).equals(Player.PIRATE))
-					throw new IllegalMoveException("You cannot jump your own pieces"); 
+					throw new IllegalMoveException("You cannot jump your own pieces!");
 				
 				// Check if the destination is occupied
 				if (this.board.getPieceAtLocation(toLocation) != null)
-					throw new IllegalMoveException("That location is already occupied");
+					throw new IllegalMoveException("That location is already occupied!");
 				
 				// Valid jump
 				break;
 				
 			default:
-				throw new IllegalMoveException("Piece cannot reach that location");
+				throw new IllegalMoveException("Piece cannot reach that location!");
 		}
 		
 		// Move the piece
