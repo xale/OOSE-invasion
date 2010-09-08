@@ -1,0 +1,16 @@
+BUGS:
+After capturing a pirate, a bulgar may make any available move (it is not limited to jumps.) [FIXED]
+
+Weird diagonal-capture thing: [FIXED]
+(x, y) zero-indexed
+Pirate:	(3, 3) -> (3, 4)
+Bulgar:	(4, 5) -> (3, 5)
+P:	(5, 3) -> (5, 4)
+B:	(3, 5) -> (3, 3)
+	(3, 3) -> (2, 4)
+
+Players cannot end turn without moving, even if they have no valid moves.
+
+Minor (not specified by the spec, but annoying):
+Error messages are rather vague.
+Players must end their turns before victory conditions are tested.
