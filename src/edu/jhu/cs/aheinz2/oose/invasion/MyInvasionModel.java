@@ -23,7 +23,7 @@ public class MyInvasionModel implements InvasionModel
 	private Player currentPlayer = Player.PIRATE;	// Pirates play first
 	private boolean currentPlayerHasMoved = false;
 	private boolean currentPlayerHasJumped = false;
-	private Location lastJumpDestiation = null;
+	private Location lastJumpDestination = null;
 	private Player winningPlayer = null;
 	
 	private Set<InvasionModelListener> listeners = new HashSet<InvasionModelListener>();
@@ -115,7 +115,7 @@ public class MyInvasionModel implements InvasionModel
 					throw new IllegalMoveException("You may not move twice in one turn");
 				
 				// Check that if the player has already jumped, he or she is using the same piece for this jump
-				if (this.currentPlayerHasJumped && !this.lastJumpDestiation.equals(fromLocation))
+				if (this.currentPlayerHasJumped && !this.lastJumpDestination.equals(fromLocation))
 					throw new IllegalMoveException("You may not move two different pieces in one turn");
 				
 				// Check that the destination is on the board
@@ -189,7 +189,7 @@ public class MyInvasionModel implements InvasionModel
 		if (jumpedLocation != null)
 		{
 			this.board.removePiece(jumpedLocation);
-			this.lastJumpDestiation = toLocation;
+			this.lastJumpDestination = toLocation;
 			this.currentPlayerHasJumped = true;
 		}
 		else
@@ -226,7 +226,7 @@ public class MyInvasionModel implements InvasionModel
 		this.currentPlayer = this.getNextPlayer();
 		this.currentPlayerHasMoved = false;
 		this.currentPlayerHasJumped = false;
-		this.lastJumpDestiation = null;
+		this.lastJumpDestination = null;
 		
 		// Notify listeners of turn change
 		this.sendEvent(new InvasionModelEvent(false, true, false));
