@@ -585,8 +585,11 @@ public class MyInvasionModel implements InvasionModel
 				MyInvasionPiece piece = this.getPieceAtLocation(jumpedLocation);
 				if ((piece != null) && (piece.getOwner().equals(Player.PIRATE)))
 				{
-					// Check that the location to jump to exists, and is unoccupied
-					Location jumpDestination = new Location((x + (jumpedLocation.getX() - x)), (y + (jumpedLocation.getX() - y)));
+					// Extrapolate in the direction of the jump to determine the destination (landing point)
+					int dx = (jumpedLocation.getX() - x), dy = (jumpedLocation.getY() - y);
+					Location jumpDestination = new Location((jumpedLocation.getX() + dx), (jumpedLocation.getY() + dy));
+					
+					// Check that the landing point exists and is unoccupied
 					if (!this.locationIsOnBoard(jumpDestination) || (this.getPieceAtLocation(jumpDestination) != null))
 						continue;
 					
