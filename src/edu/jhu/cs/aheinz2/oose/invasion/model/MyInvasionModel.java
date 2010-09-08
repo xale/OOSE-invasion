@@ -190,7 +190,7 @@ public class MyInvasionModel implements InvasionModel
 			this.sendEvent(new InvasionModelEvent(true, false, true));
 		}
 		// Check whether to end the turn
-		else if (!(this.currentPlayerHasJumped && this.board.playerHasLegalJumps(this.currentPlayer)))
+		else if (!(this.currentPlayerHasJumped && this.board.pieceAtLocationHasLegalJumps(this.lastJumpDestination)))
 		{
 			// Change the current player
 			this.swapCurrentPlayer();
@@ -508,6 +508,16 @@ public class MyInvasionModel implements InvasionModel
 			}
 			
 			return false;
+		}
+		
+		/**
+		 * Determines if the piece at the specified location (assumed to be a bulgar) can make at least one valid jump.
+		 * @param location The location of the piece.
+		 * @return True if the piece can jump over at least one pirate, false otherwise.
+		 */
+		public boolean pieceAtLocationHasLegalJumps(Location location)
+		{
+			return this.pieceAtCoordinatesHasLegalJumps(location.getX(), location.getY());
 		}
 		
 		/**
