@@ -42,8 +42,7 @@ public class MyInvasionModel implements InvasionModel
 			throw new IllegalMoveException("You must move your own pieces!");
 		
 		// Check the distance being moved, to determine if this is a move or a jump
-		int dx = (toLocation.getX() - fromLocation.getX());
-		int dy = (toLocation.getY() - fromLocation.getY());
+		int dx = (toLocation.getX() - fromLocation.getX()), dy = (toLocation.getY() - fromLocation.getY());
 		Location jumpedLocation = null;
 		
 		switch (Math.max(Math.abs(dx), Math.abs(dy)))
@@ -123,8 +122,7 @@ public class MyInvasionModel implements InvasionModel
 					throw new IllegalMoveException("You cannot move off of the board!");
 				
 				// Determine the direction in which the piece is attempting to jump
-				int dHoriz = 0;
-				int dVert = 0;
+				int dHoriz = 0, dVert = 0;
 				
 				// Horizontal
 				if (dy == 0)
