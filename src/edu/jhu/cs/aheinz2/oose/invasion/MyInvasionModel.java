@@ -64,7 +64,7 @@ public class MyInvasionModel implements InvasionModel
 				
 				// Check if the player has already moved
 				if (this.currentPlayerHasMoved)
-					throw new IllegalMoveException("You may not move twice in one turn");
+					throw new IllegalMoveException("You may not move twice in one turn!");
 				
 				// Check if the player has jumped a piece
 				if (this.currentPlayerHasJumped)
@@ -108,11 +108,11 @@ public class MyInvasionModel implements InvasionModel
 				
 				// Check if the player controls the bulgars
 				if (!this.currentPlayer.equals(Player.BULGAR))
-					throw new IllegalMoveException("Piece cannot reach that location");
+					throw new IllegalMoveException("Piece cannot reach that location!");
 				
 				// Check if the player has already moved
 				if (this.currentPlayerHasMoved)
-					throw new IllegalMoveException("You may not move twice in one turn");
+					throw new IllegalMoveException("You may not move twice in one turn!");
 				
 				// Check that if the player has already jumped, he or she is using the same piece for this jump
 				if (this.currentPlayerHasJumped && !this.lastJumpDestination.equals(fromLocation))
@@ -220,7 +220,7 @@ public class MyInvasionModel implements InvasionModel
 	{
 		// Check that the player can legally end his or her turn
 		if (!this.currentPlayerHasMoved && !this.currentPlayerHasJumped && this.board.playerHasLegalMoves(this.currentPlayer))
-			throw new IllegalMoveException("You must make a move");
+			throw new IllegalMoveException("You must make a move!");
 		
 		// Change the current player
 		this.currentPlayer = this.getNextPlayer();
