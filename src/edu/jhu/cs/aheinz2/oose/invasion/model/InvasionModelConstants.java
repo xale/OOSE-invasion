@@ -4,7 +4,7 @@
  * @author alex_heinz
  * Created on Sep 2, 2010
  *
- * 
+ * Game/board constants for use by the model.
  */
 
 package edu.jhu.cs.aheinz2.oose.invasion.model;
@@ -17,14 +17,6 @@ import edu.jhu.cs.oose.fall2010.invasion.iface.Location;
  */
 interface InvasionModelConstants
 {
-	// Board size
-	static final int INVASION_BOARD_WIDTH = 7;
-	static final int INVASION_BOARD_HEIGHT = INVASION_BOARD_WIDTH;
-	
-	// Cut-out corner sizes
-	static final int INVASION_BOARD_CORNER_WIDTH = 2;
-	static final int INVASION_BOARD_CORNER_HEIGHT = INVASION_BOARD_CORNER_WIDTH;
-	
 	// Bounding box on the fortress
 	static final int INVASION_BOARD_FORTRESS_MIN_X = 2;
 	static final int INVASION_BOARD_FORTRESS_MIN_Y = 4;

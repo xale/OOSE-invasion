@@ -11,6 +11,7 @@ package edu.jhu.cs.aheinz2.oose.invasion.model;
 
 import java.util.*;
 
+import edu.jhu.cs.aheinz2.oose.invasion.iface.*;
 import edu.jhu.cs.oose.fall2010.invasion.iface.*;
 
 /**
@@ -327,7 +328,7 @@ public class MyInvasionModel implements InvasionModel
 	static class MyInvasionBoard
 	{
 		// Note: the board is indexed left-to-right, top-to-bottom
-		private MyInvasionPiece[][] contents = new MyInvasionPiece[InvasionModelConstants.INVASION_BOARD_WIDTH][InvasionModelConstants.INVASION_BOARD_HEIGHT];
+		private MyInvasionPiece[][] contents = new MyInvasionPiece[InvasionConstants.INVASION_BOARD_WIDTH][InvasionConstants.INVASION_BOARD_HEIGHT];
 		private Map<Location,Set<Location>> diagonals = new HashMap<Location,Set<Location>>();
 		private int piratesLeft = 0;
 		
@@ -337,7 +338,7 @@ public class MyInvasionModel implements InvasionModel
 		public MyInvasionBoard()
 		{
 			// Set up the pirates pieces
-			for (int x = 0; x < InvasionModelConstants.INVASION_BOARD_WIDTH; x++)
+			for (int x = 0; x < InvasionConstants.INVASION_BOARD_WIDTH; x++)
 			{
 				for (int y = 0; y < InvasionModelConstants.INVASION_BOARD_NUM_PIRATE_OCCUPIED_ROWS; y++)
 				{
@@ -356,9 +357,9 @@ public class MyInvasionModel implements InvasionModel
 			}
 			
 			// Map each location on the board to a set of locations that are adjacent across a diagonal
-			for (int x = 0; x < InvasionModelConstants.INVASION_BOARD_WIDTH; x++)
+			for (int x = 0; x < InvasionConstants.INVASION_BOARD_WIDTH; x++)
 			{
-				for (int y = 0; y < InvasionModelConstants.INVASION_BOARD_HEIGHT; y++)
+				for (int y = 0; y < InvasionConstants.INVASION_BOARD_HEIGHT; y++)
 				{
 					// Shortcut: diagonally join locations with "even" coordinates; i.e., the subset of (valid) locations for which (x + y) is even
 					if (this.coordinatesAreOnBoard(x, y) && (((x + y) % 2) == 0))
@@ -421,9 +422,9 @@ public class MyInvasionModel implements InvasionModel
 		public boolean playerHasLegalMoves(Player player)
 		{
 			// Iterate over the board, looking for the player's pieces
-			for (int x = 0; x < InvasionModelConstants.INVASION_BOARD_WIDTH; x++)
+			for (int x = 0; x < InvasionConstants.INVASION_BOARD_WIDTH; x++)
 			{
-				for (int y = 0; y < InvasionModelConstants.INVASION_BOARD_HEIGHT; y++)
+				for (int y = 0; y < InvasionConstants.INVASION_BOARD_HEIGHT; y++)
 				{
 					// Check that these coordinates are on the board
 					if (this.coordinatesAreOnBoard(x, y))
@@ -455,9 +456,9 @@ public class MyInvasionModel implements InvasionModel
 				return false;
 			
 			// Search the board for bulgar pieces
-			for (int x = 0; x < InvasionModelConstants.INVASION_BOARD_WIDTH; x++)
+			for (int x = 0; x < InvasionConstants.INVASION_BOARD_WIDTH; x++)
 			{
-				for (int y = 0; y < InvasionModelConstants.INVASION_BOARD_HEIGHT; y++)
+				for (int y = 0; y < InvasionConstants.INVASION_BOARD_HEIGHT; y++)
 				{
 					// Check that these coordinates are on the board
 					if (this.coordinatesAreOnBoard(x, y))
@@ -728,21 +729,21 @@ public class MyInvasionModel implements InvasionModel
 		private boolean coordinatesAreOnBoard(int x, int y)
 		{
 			// Check that the location is within the bounds of the board
-			if ((x < 0) || (y < 0) || (x >= InvasionModelConstants.INVASION_BOARD_WIDTH) || (y >= InvasionModelConstants.INVASION_BOARD_HEIGHT))
+			if ((x < 0) || (y < 0) || (x >= InvasionConstants.INVASION_BOARD_WIDTH) || (y >= InvasionConstants.INVASION_BOARD_HEIGHT))
 				return false;
 			
 			// Check that the location does not lie in one of the corners
 			// Top left corner
-			if ((x < InvasionModelConstants.INVASION_BOARD_CORNER_WIDTH) && (y < InvasionModelConstants.INVASION_BOARD_CORNER_HEIGHT))
+			if ((x < InvasionConstants.INVASION_BOARD_CORNER_WIDTH) && (y < InvasionConstants.INVASION_BOARD_CORNER_HEIGHT))
 				return false;
 			// Top right corner
-			if ((x >= (InvasionModelConstants.INVASION_BOARD_WIDTH - InvasionModelConstants.INVASION_BOARD_CORNER_WIDTH)) && (y < InvasionModelConstants.INVASION_BOARD_CORNER_HEIGHT))
+			if ((x >= (InvasionConstants.INVASION_BOARD_WIDTH - InvasionConstants.INVASION_BOARD_CORNER_WIDTH)) && (y < InvasionConstants.INVASION_BOARD_CORNER_HEIGHT))
 				return false;
 			// Bottom left corner
-			if ((x < InvasionModelConstants.INVASION_BOARD_CORNER_WIDTH) && (y >= (InvasionModelConstants.INVASION_BOARD_HEIGHT - InvasionModelConstants.INVASION_BOARD_CORNER_HEIGHT)))
+			if ((x < InvasionConstants.INVASION_BOARD_CORNER_WIDTH) && (y >= (InvasionConstants.INVASION_BOARD_HEIGHT - InvasionConstants.INVASION_BOARD_CORNER_HEIGHT)))
 				return false;
 			// Bottom right corner
-			if ((x >= (InvasionModelConstants.INVASION_BOARD_WIDTH - InvasionModelConstants.INVASION_BOARD_CORNER_WIDTH)) && (y >= (InvasionModelConstants.INVASION_BOARD_HEIGHT - InvasionModelConstants.INVASION_BOARD_CORNER_HEIGHT)))
+			if ((x >= (InvasionConstants.INVASION_BOARD_WIDTH - InvasionConstants.INVASION_BOARD_CORNER_WIDTH)) && (y >= (InvasionConstants.INVASION_BOARD_HEIGHT - InvasionConstants.INVASION_BOARD_CORNER_HEIGHT)))
 				return false;
 			
 			// Valid location
