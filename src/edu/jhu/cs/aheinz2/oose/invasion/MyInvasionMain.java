@@ -17,7 +17,8 @@ import edu.jhu.cs.oose.fall2010.invasion.iface.*;
 public class MyInvasionMain
 {
 	/**
-	 * @param args
+	 * Main executable method. Starts an invasion UI using a specified model class, or the default model if none is specified. 
+	 * @param args Arguments to program; first argument will be treated as the name of a model class, if it is present. Others ignored.
 	 */
 	public static void main(String[] args) throws ClassNotFoundException
 	{
@@ -27,10 +28,13 @@ public class MyInvasionMain
 		// Check for arguments
 		if (args.length > 0)
 		{
-			// Attempt to load a different model class
+			// Attempt to load a different model class (exceptions here will not be caught)
 			modelClass = Class.forName(args[0]).asSubclass(InvasionModel.class);
 		}
 		
-		// 
+		// Create the UI using the specified class
+		MyInvasionUI ui = new MyInvasionUI(modelClass);
+		ui.setLocationRelativeTo(null);
+		ui.setVisible(true);
 	}
 }
