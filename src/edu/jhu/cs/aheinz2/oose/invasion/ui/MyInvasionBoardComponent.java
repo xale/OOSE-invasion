@@ -44,6 +44,10 @@ public class MyInvasionBoardComponent extends JComponent
 		this.model.addListener(this.modelListener);
 	}
 	
+	/**
+	 * Changes the model object that his component represents, and repaints the component accordingly.
+	 * @param newModel The new represented invasion model.
+	 */
 	public void setModel(InvasionModel newModel)
 	{
 		// Remove our listener from the old model
