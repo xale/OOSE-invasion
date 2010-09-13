@@ -1,13 +1,13 @@
 /**
  * MyInvasionModel.java
- * edu.jhu.cs.aheinz2.oose.MyInvasionModel
+ * edu.jhu.cs.aheinz2.oose.invasion.model
  * @author alex_heinz
  * Created on Sep 1, 2010
  *
  * InvasionModel-conforming model object implementation
  */
 
-package edu.jhu.cs.aheinz2.oose.invasion;
+package edu.jhu.cs.aheinz2.oose.invasion.model;
 
 import java.util.*;
 

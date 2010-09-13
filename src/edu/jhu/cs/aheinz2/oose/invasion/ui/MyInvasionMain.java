@@ -1,13 +1,14 @@
 /**
  * MyInvasionMain.java
- * edu.jhu.cs.aheinz2.oose.invasion
+ * edu.jhu.cs.aheinz2.oose.invasion.ui
  * @author alex_heinz
  * Created on Sep 10, 2010
  *
  * 
  */
-package edu.jhu.cs.aheinz2.oose.invasion;
+package edu.jhu.cs.aheinz2.oose.invasion.ui;
 
+import edu.jhu.cs.aheinz2.oose.invasion.model.MyInvasionModel;
 import edu.jhu.cs.oose.fall2010.invasion.iface.*;
 
 /**

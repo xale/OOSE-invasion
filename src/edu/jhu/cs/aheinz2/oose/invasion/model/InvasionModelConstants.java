@@ -1,13 +1,13 @@
 /**
  * InvasionModelConstants.java
- * edu.jhu.cs.aheinz2.oose.MyInvasionModel
+ * edu.jhu.cs.aheinz2.oose.invasion.model
  * @author alex_heinz
  * Created on Sep 2, 2010
  *
  * 
  */
 
-package edu.jhu.cs.aheinz2.oose.invasion;
+package edu.jhu.cs.aheinz2.oose.invasion.model;
 
 import edu.jhu.cs.oose.fall2010.invasion.iface.Location;
 
