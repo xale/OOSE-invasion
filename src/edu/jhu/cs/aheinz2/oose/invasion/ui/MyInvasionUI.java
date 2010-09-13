@@ -22,7 +22,9 @@ public class MyInvasionUI extends JFrame
 {
 	private Class<? extends InvasionModel> modelClass = null;
 	private InvasionModel model = null;
+	private InvasionModelListener modelListener = null;
 	
+	private MyInvasionBoardComponent boardView = new MyInvasionBoardComponent();
 	private JLabel statusLabel = new JLabel();
 	private JButton endButton = new JButton("End Turn");
 	
@@ -30,14 +32,14 @@ public class MyInvasionUI extends JFrame
 	{
 		super();
 		
+		// Set the window title
+		this.setTitle("Invasion");
+		
 		// Hold onto the class we're using for our model, so we can generate more if necessary
 		this.modelClass = modelClass;
 		
-		// Create the first instance of our model
-		this.model = this.newModelInstance();
-		
-		// Add a listener to the model
-		this.model.addListener(new InvasionModelListener()
+		// Create a listener for the model
+		this.modelListener = new InvasionModelListener()
 		{
 			@Override
 			public void receiveEvent(InvasionModelEvent event)
@@ -49,7 +51,10 @@ public class MyInvasionUI extends JFrame
 				if (event.isGameOver())
 					MyInvasionUI.this.observeGameEnded();
 			}
-		});
+		};
+		
+		// Create the first model instance
+		this.setModel(this.newModelInstance());
 		
 		// Set up the status label
 		this.statusLabel.setText("Pirates play first.");
@@ -59,12 +64,17 @@ public class MyInvasionUI extends JFrame
 		bottomPanel.add(this.statusLabel, BorderLayout.CENTER);
 		bottomPanel.add(this.endButton, BorderLayout.EAST);
 		
-		// Configure the layout of the bottom panel
-		// TODO: WRITEME
+		// Add the bottom panel and the board to a main panel
+		JPanel mainPanel = new JPanel(new BorderLayout());
+		mainPanel.add(this.boardView, BorderLayout.CENTER);
+		mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 		
-		// Add all GUI elements to this window
-		this.setContentPane(bottomPanel); // FIXME: temporary, for testing
-		// TODO: WRITEME
+		// Add all GUI elements to this window, and ask them to arrange themselves
+		this.setContentPane(mainPanel);
+		this.pack();
+		
+		// Set up the application to close with the window
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
 	/**
@@ -89,6 +99,27 @@ public class MyInvasionUI extends JFrame
 	protected void observeGameEnded()
 	{
 		// TODO Auto-generated method stub
+	}
+	
+	/**
+	 * Sets the model object representing the current game in progress. Called at the beginning of a game.
+	 * @param newModel The model object storing information about a new game to be played.
+	 */
+	private void setModel(InvasionModel newModel)
+	{
+		// Remove our listener from the old model, if necessary
+		if (this.model != null)
+			this.model.removeListener(this.modelListener);
+		
+		// Swap out the models
+		this.model = newModel;
+		
+		// Add the listener to the model
+		if (this.model != null)
+			this.model.addListener(this.modelListener);
+		
+		// Update the board view's model
+		this.boardView.setModel(this.model);
 	}
 	
 	/**
