@@ -22,15 +22,11 @@ public class MyInvasionBoardComponent extends JComponent
 	private InvasionModelListener modelListener = null;
 	
 	/**
-	 * Creates a new invasion board component, representing the specified model.
-	 * @param model The represented invasion model drawn by this component.
+	 * Creates a new invasion board component, initially with no represented model.
 	 */
-	public MyInvasionBoardComponent(InvasionModel model)
+	public MyInvasionBoardComponent()
 	{
-		// Hold onto the model we've been given
-		this.model = model;
-		
-		// Create a listener that updates the component
+		// Create a listener that updates the component, which will eventually be attached to a model object
 		this.modelListener = new InvasionModelListener()
 		{
 			@Override
@@ -39,9 +35,6 @@ public class MyInvasionBoardComponent extends JComponent
 				MyInvasionBoardComponent.this.repaint();
 			}
 		};
-		
-		// Attach the listener to the model
-		this.model.addListener(this.modelListener);
 	}
 	
 	/**
@@ -50,14 +43,16 @@ public class MyInvasionBoardComponent extends JComponent
 	 */
 	public void setModel(InvasionModel newModel)
 	{
-		// Remove our listener from the old model
-		this.model.removeListener(this.modelListener);
+		// Remove our listener from the old model (if necessary)
+		if (this.model != null)
+			this.model.removeListener(this.modelListener);
 		
 		// Swap in the new model
 		this.model = newModel;
 		
 		// Add the listener to the new model
-		this.model.addListener(this.modelListener);
+		if (this.model != null)
+			this.model.addListener(this.modelListener);
 		
 		// Repaint the component
 		this.repaint();
