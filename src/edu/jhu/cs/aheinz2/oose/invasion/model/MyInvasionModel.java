@@ -71,7 +71,7 @@ public class MyInvasionModel implements InvasionModel
 					throw new IllegalMoveException("You may not make a non-jump move after a jump!");
 				
 				// Check that the destination is on the board
-				if (!this.board.locationIsOnBoard(toLocation))
+				if (!InvasionConstants.locationIsOnBoard(toLocation))
 					throw new IllegalMoveException("You cannot move off of the board!");
 				
 				// Check if the locations are connected
@@ -119,7 +119,7 @@ public class MyInvasionModel implements InvasionModel
 					throw new IllegalMoveException("You may not move two different pieces in one turn!");
 				
 				// Check that the destination is on the board
-				if (!this.board.locationIsOnBoard(toLocation))
+				if (!InvasionConstants.locationIsOnBoard(toLocation))
 					throw new IllegalMoveException("You cannot move off of the board!");
 				
 				// Determine the direction in which the piece is attempting to jump
@@ -342,7 +342,7 @@ public class MyInvasionModel implements InvasionModel
 			{
 				for (int y = 0; y < InvasionModelConstants.INVASION_BOARD_NUM_PIRATE_OCCUPIED_ROWS; y++)
 				{
-					if (this.coordinatesAreOnBoard(x, y))
+					if (InvasionConstants.coordinatesAreOnBoard(x, y))
 					{
 						this.contents[x][y] = new MyInvasionPiece(Player.PIRATE);
 						this.piratesLeft++;
@@ -362,17 +362,17 @@ public class MyInvasionModel implements InvasionModel
 				for (int y = 0; y < InvasionConstants.INVASION_BOARD_HEIGHT; y++)
 				{
 					// Shortcut: diagonally join locations with "even" coordinates; i.e., the subset of (valid) locations for which (x + y) is even
-					if (this.coordinatesAreOnBoard(x, y) && (((x + y) % 2) == 0))
+					if (InvasionConstants.coordinatesAreOnBoard(x, y) && (((x + y) % 2) == 0))
 					{
 						// Add each valid, diagonally-adjacent neighbor of the location to a set
 						Set<Location> adjacents = new HashSet<Location>(4);
-						if (this.coordinatesAreOnBoard((x - 1), (y - 1)))
+						if (InvasionConstants.coordinatesAreOnBoard((x - 1), (y - 1)))
 							adjacents.add(new Location((x - 1), (y - 1)));
-						if (this.coordinatesAreOnBoard((x + 1), (y - 1)))
+						if (InvasionConstants.coordinatesAreOnBoard((x + 1), (y - 1)))
 							adjacents.add(new Location((x + 1), (y - 1)));
-						if (this.coordinatesAreOnBoard((x - 1), (y + 1)))
+						if (InvasionConstants.coordinatesAreOnBoard((x - 1), (y + 1)))
 							adjacents.add(new Location((x - 1), (y + 1)));
-						if (this.coordinatesAreOnBoard((x + 1), (y + 1)))
+						if (InvasionConstants.coordinatesAreOnBoard((x + 1), (y + 1)))
 							adjacents.add(new Location((x + 1), (y + 1)));
 						
 						// Map the location to the set
@@ -427,7 +427,7 @@ public class MyInvasionModel implements InvasionModel
 				for (int y = 0; y < InvasionConstants.INVASION_BOARD_HEIGHT; y++)
 				{
 					// Check that these coordinates are on the board
-					if (this.coordinatesAreOnBoard(x, y))
+					if (InvasionConstants.coordinatesAreOnBoard(x, y))
 					{
 						// Determine if there is a piece owned by the player at these coordinates
 						MyInvasionPiece piece = this.contents[x][y];
@@ -461,7 +461,7 @@ public class MyInvasionModel implements InvasionModel
 				for (int y = 0; y < InvasionConstants.INVASION_BOARD_HEIGHT; y++)
 				{
 					// Check that these coordinates are on the board
-					if (this.coordinatesAreOnBoard(x, y))
+					if (InvasionConstants.coordinatesAreOnBoard(x, y))
 					{
 						// Determine if these coordinates contain a bulgar
 						MyInvasionPiece piece = this.getPieceAtCoordinates(x, y);
@@ -500,7 +500,7 @@ public class MyInvasionModel implements InvasionModel
 			for (Location newLocation : adjacentLocations)
 			{
 				// Check that the location exists
-				if (!this.locationIsOnBoard(newLocation))
+				if (!InvasionConstants.locationIsOnBoard(newLocation))
 					continue;
 				
 				// Check that the location is unoccupied
@@ -561,11 +561,11 @@ public class MyInvasionModel implements InvasionModel
 			for (Location[] jump : jumps)
 			{
 				// Check that the location to jump over exists
-				if (!this.locationIsOnBoard(jump[0]))
+				if (!InvasionConstants.locationIsOnBoard(jump[0]))
 					continue;
 				
 				// Check that the location to jump to exists, and is unoccupied
-				if (!this.locationIsOnBoard(jump[1]) || (this.getPieceAtLocation(jump[1]) != null))
+				if (!InvasionConstants.locationIsOnBoard(jump[1]) || (this.getPieceAtLocation(jump[1]) != null))
 					continue;
 				
 				// Check that the location to jump over contains a pirate piece
@@ -589,7 +589,7 @@ public class MyInvasionModel implements InvasionModel
 					Location jumpDestination = new Location((jumpedLocation.getX() + dx), (jumpedLocation.getY() + dy));
 					
 					// Check that the landing point exists and is unoccupied
-					if (!this.locationIsOnBoard(jumpDestination) || (this.getPieceAtLocation(jumpDestination) != null))
+					if (!InvasionConstants.locationIsOnBoard(jumpDestination) || (this.getPieceAtLocation(jumpDestination) != null))
 						continue;
 					
 					// Check that the location to jump is reachable from the jumped location 
@@ -641,7 +641,7 @@ public class MyInvasionModel implements InvasionModel
 		public boolean locationsAreConnected(Location a, Location b)
 		{
 			// Test if either of the locations is not on the board
-			if (!this.locationIsOnBoard(a) || !this.locationIsOnBoard(b))
+			if (!InvasionConstants.locationIsOnBoard(a) || !InvasionConstants.locationIsOnBoard(b))
 				return false;
 			
 			// Test if the locations are adjacent horizontally
@@ -703,51 +703,11 @@ public class MyInvasionModel implements InvasionModel
 		private MyInvasionPiece getPieceAtCoordinates(int x, int y)
 		{
 			// Check if the coordinates are valid (i.e., on the board)
-			if (!this.coordinatesAreOnBoard(x, y))
+			if (!InvasionConstants.coordinatesAreOnBoard(x, y))
 				throw new RuntimeException("Piece requested at coordinates not on board: (" + x + ", " + y + ")");
 			
 			// Return the contents of the board at the specified coordinates
 			return this.contents[x][y];
-		}
-		
-		/**
-		 * Determines whether a given location is valid in the board's coordinate system; i.e., if the location is on the board.
-		 * @param location The location to test.
-		 * @return True if the location is a valid location on the board, false otherwise.
-		 */
-		public boolean locationIsOnBoard(Location location)
-		{
-			return this.coordinatesAreOnBoard(location.getX(), location.getY());
-		}
-		
-		/**
-		 * Determines if the specified x- and y-coordinates specify a valid location on the board.
-		 * @param x The x-coordinate of the location to test.
-		 * @param y The y-coordinate of the location to test.
-		 * @return True of the board contains (x, y), false otherwise.
-		 */
-		private boolean coordinatesAreOnBoard(int x, int y)
-		{
-			// Check that the location is within the bounds of the board
-			if ((x < 0) || (y < 0) || (x >= InvasionConstants.INVASION_BOARD_WIDTH) || (y >= InvasionConstants.INVASION_BOARD_HEIGHT))
-				return false;
-			
-			// Check that the location does not lie in one of the corners
-			// Top left corner
-			if ((x < InvasionConstants.INVASION_BOARD_CORNER_WIDTH) && (y < InvasionConstants.INVASION_BOARD_CORNER_HEIGHT))
-				return false;
-			// Top right corner
-			if ((x >= (InvasionConstants.INVASION_BOARD_WIDTH - InvasionConstants.INVASION_BOARD_CORNER_WIDTH)) && (y < InvasionConstants.INVASION_BOARD_CORNER_HEIGHT))
-				return false;
-			// Bottom left corner
-			if ((x < InvasionConstants.INVASION_BOARD_CORNER_WIDTH) && (y >= (InvasionConstants.INVASION_BOARD_HEIGHT - InvasionConstants.INVASION_BOARD_CORNER_HEIGHT)))
-				return false;
-			// Bottom right corner
-			if ((x >= (InvasionConstants.INVASION_BOARD_WIDTH - InvasionConstants.INVASION_BOARD_CORNER_WIDTH)) && (y >= (InvasionConstants.INVASION_BOARD_HEIGHT - InvasionConstants.INVASION_BOARD_CORNER_HEIGHT)))
-				return false;
-			
-			// Valid location
-			return true;
 		}
 	}
 	
