@@ -8,8 +8,13 @@
  */
 package edu.jhu.cs.aheinz2.oose.invasion.ui;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+
 import javax.swing.JComponent;
 
+import edu.jhu.cs.aheinz2.oose.invasion.iface.InvasionConstants;
 import edu.jhu.cs.oose.fall2010.invasion.iface.*;
 
 /**
@@ -35,6 +40,9 @@ public class MyInvasionBoardComponent extends JComponent
 				MyInvasionBoardComponent.this.repaint();
 			}
 		};
+		
+		// Set a default size for the component
+		this.setPreferredSize(new Dimension(500, 500));
 	}
 	
 	/**
@@ -56,5 +64,39 @@ public class MyInvasionBoardComponent extends JComponent
 		
 		// Repaint the component
 		this.repaint();
+	}
+	
+	@Override
+	protected void paintComponent(Graphics g)
+	{
+		// Paint the background black
+		g.setColor(Color.black);
+		g.fillRect(0, 0, this.getWidth(), this.getHeight());
+		
+		// Paint the grid
+		for (int x = 0; x < InvasionConstants.INVASION_BOARD_WIDTH; x++)
+		{
+			for (int y = 0; y < InvasionConstants.INVASION_BOARD_HEIGHT; y++)
+			{
+				if (!InvasionConstants.coordinatesAreOnBoard(x, y))
+					continue;
+				
+				// TODO: WRITEME
+			}
+		}
+		
+		// Draw the pieces
+		for (int x = 0; x < InvasionConstants.INVASION_BOARD_WIDTH; x++)
+		{
+			for (int y = 0; y < InvasionConstants.INVASION_BOARD_HEIGHT; y++)
+			{
+				if (!InvasionConstants.coordinatesAreOnBoard(x, y))
+					continue;
+				
+				// TODO: WRITEME
+				// g.drawImage(img, x, y, width, height, null);
+			}
+		}
+		
 	}
 }
