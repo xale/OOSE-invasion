@@ -329,7 +329,6 @@ public class MyInvasionModel implements InvasionModel
 	{
 		// Note: the board is indexed left-to-right, top-to-bottom
 		private MyInvasionPiece[][] contents = new MyInvasionPiece[InvasionConstants.INVASION_BOARD_WIDTH][InvasionConstants.INVASION_BOARD_HEIGHT];
-		private Map<Location,Set<Location>> diagonals = new HashMap<Location,Set<Location>>();
 		private int piratesLeft = 0;
 		
 		/**
@@ -354,36 +353,6 @@ public class MyInvasionModel implements InvasionModel
 			for (Location location : InvasionModelConstants.INVASION_BOARD_INITIAL_BULGAR_LOCATIONS)
 			{
 				this.contents[location.getX()][location.getY()] = new MyInvasionPiece(Player.BULGAR);
-			}
-			
-			// Map each location on the board to a set of locations that are adjacent across a diagonal
-			for (int x = 0; x < InvasionConstants.INVASION_BOARD_WIDTH; x++)
-			{
-				for (int y = 0; y < InvasionConstants.INVASION_BOARD_HEIGHT; y++)
-				{
-					// Shortcut: diagonally join locations with "even" coordinates; i.e., the subset of (valid) locations for which (x + y) is even
-					if (InvasionConstants.coordinatesAreOnBoard(x, y) && (((x + y) % 2) == 0))
-					{
-						// Add each valid, diagonally-adjacent neighbor of the location to a set
-						Set<Location> adjacents = new HashSet<Location>(4);
-						if (InvasionConstants.coordinatesAreOnBoard((x - 1), (y - 1)))
-							adjacents.add(new Location((x - 1), (y - 1)));
-						if (InvasionConstants.coordinatesAreOnBoard((x + 1), (y - 1)))
-							adjacents.add(new Location((x + 1), (y - 1)));
-						if (InvasionConstants.coordinatesAreOnBoard((x - 1), (y + 1)))
-							adjacents.add(new Location((x - 1), (y + 1)));
-						if (InvasionConstants.coordinatesAreOnBoard((x + 1), (y + 1)))
-							adjacents.add(new Location((x + 1), (y + 1)));
-						
-						// Map the location to the set
-						this.diagonals.put(new Location(x, y), adjacents);
-					}
-					else
-					{
-						// If the location has no diagonals, map it to an empty set
-						this.diagonals.put(new Location(x, y), new HashSet<Location>(0));
-					}
-				}
 			}
 		}
 
@@ -516,7 +485,7 @@ public class MyInvasionModel implements InvasionModel
 			}
 			
 			// Check for diagonal moves
-			for (Location newLocation : this.diagonals.get(oldLocation))
+			for (Location newLocation : InvasionConstants.INVASION_BOARD_DIAGONALS.get(oldLocation))
 			{
 				// Check that the location is unoccupied
 				if (this.getPieceAtLocation(newLocation) != null)
@@ -578,7 +547,7 @@ public class MyInvasionModel implements InvasionModel
 			}
 			
 			// Check for diagonal jumps
-			for (Location jumpedLocation : this.diagonals.get(oldLocation))
+			for (Location jumpedLocation : InvasionConstants.INVASION_BOARD_DIAGONALS.get(oldLocation))
 			{
 				// Check if there are any diagonally-adjacent pirates
 				MyInvasionPiece piece = this.getPieceAtLocation(jumpedLocation);
@@ -653,7 +622,7 @@ public class MyInvasionModel implements InvasionModel
 				return true;
 			
 			// Test if the locations are connected diagonally
-			if (this.diagonals.get(a).contains(b))
+			if (InvasionConstants.INVASION_BOARD_DIAGONALS.get(a).contains(b))
 				return true;
 			
 			return false;
