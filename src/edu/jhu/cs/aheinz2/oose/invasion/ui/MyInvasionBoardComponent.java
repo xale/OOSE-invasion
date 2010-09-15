@@ -9,7 +9,6 @@
 package edu.jhu.cs.aheinz2.oose.invasion.ui;
 
 import java.awt.*;
-import java.awt.geom.*;
 import java.net.URL;
 
 import javax.swing.JComponent;
@@ -33,7 +32,9 @@ public class MyInvasionBoardComponent extends JComponent
 	private Dimension defaultBoardDimensions = new Dimension(600, 600);
 	
 	private ImageIcon invaderImage = null;
+	private ImageIcon selectedInvaderImage = null;
 	private ImageIcon defenderImage = null;
+	private ImageIcon selectedDefenderImage = null;
 	
 	/**
 	 * Creates a new invasion board component, initially with no represented model.
@@ -57,8 +58,14 @@ public class MyInvasionBoardComponent extends JComponent
 		// Invader (pirate) piece
 		this.invaderImage = this.loadImageResource("Invader.png");
 		
+		// Selected invader piece
+		this.selectedInvaderImage = this.loadImageResource("InvaderSelected.png");
+		
 		// Defender (bulgar) piece
 		this.defenderImage = this.loadImageResource("Defender.png");
+		
+		// Selected defender piece
+		this.selectedDefenderImage = this.loadImageResource("DefenderSelected.png");
 		
 		// Set a default size for the component
 		this.setPreferredSize(this.defaultBoardDimensions);
@@ -103,17 +110,17 @@ public class MyInvasionBoardComponent extends JComponent
 			for (int row = 0; row < InvasionConstants.INVASION_BOARD_HEIGHT; row++)
 			{
 				// Check that these coordinates represent a valid board location
-				if (!InvasionConstants.coordinatesAreOnBoard(col, row))
+				Location loc = new Location(col, row);
+				if (!InvasionConstants.locationIsOnBoard(loc))
 					continue;
 				
 				// Check if the location is occupied
-				Player pieceOwner = model.getPieceOwner(new Location(col, row));
+				Player pieceOwner = model.getPieceOwner(loc);
 				if (pieceOwner == null)
 					continue;
 				
 				// Get the image corresponding to this player's piece
-				// TODO: check if piece is selected
-				ImageIcon pieceImage = this.pieceImageForPlayer(pieceOwner);
+				ImageIcon pieceImage = this.pieceImageForPlayer(pieceOwner, loc.equals(this.selectedPieceLocation));
 				
 				// Find the point on the component corresponding to these board coordinates
 				int x = (int)((col + 1) * (this.defaultBoardDimensions.getWidth() / (InvasionConstants.INVASION_BOARD_WIDTH + 1)));
@@ -132,16 +139,27 @@ public class MyInvasionBoardComponent extends JComponent
 	/**
 	 * Gets the piece image for a piece owned by the specified player.
 	 * @param pieceOwner The player who controls the piece.
+	 * @param selected Specifies if the piece is currently selected.
 	 * @return the "invader" image if the player controls the pirates, or the "defender" image if the player controls the bulgars.
 	 */
-	private ImageIcon pieceImageForPlayer(Player pieceOwner)
+	private ImageIcon pieceImageForPlayer(Player pieceOwner, boolean selected)
 	{
 		switch (pieceOwner)
 		{
 			case PIRATE:
-				return this.invaderImage;
+			{
+				if (selected)
+					return this.selectedInvaderImage;
+				else
+					return this.invaderImage;
+			}	
 			case BULGAR:
-				return this.defenderImage;
+			{
+				if (selected)
+					return this.selectedDefenderImage;
+				else
+					return this.defenderImage;
+			}	
 			default:
 				break;
 		}
