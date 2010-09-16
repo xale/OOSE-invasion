@@ -58,6 +58,11 @@ public class MyInvasionBoardComponent extends JComponent
 			@Override
 			public void receiveEvent(InvasionModelEvent event)
 			{
+				// If the turn or game ended, deselect the current piece
+				if (event.isTurnChanged() || event.isGameOver())
+					MyInvasionBoardComponent.this.setSelectedPieceLocation(null);
+				
+				// Repaint the component
 				MyInvasionBoardComponent.this.repaint();
 			}
 		};
@@ -193,6 +198,31 @@ public class MyInvasionBoardComponent extends JComponent
 		this.repaint();
 	}
 	
+	/**
+	 * Retrieves the location on the board of the current selected piece.
+	 * @return The location on the board of the current selected piece.
+	 */
+	public Location getSelectedPieceLocation()
+	{
+		return selectedPieceLocation;
+	}
+
+	/**
+	 * Sets the selected piece on the board to the piece at the specified location.
+	 * @param newLocation The new location on the board of the new selected piece.
+	 */
+	public void setSelectedPieceLocation(Location newLocation)
+	{
+		// Check that there is a piece at the specified location
+		if ((newLocation != null) && (this.model.getPieceOwner(newLocation) == null))
+			throw new RuntimeException("Attempt to select location with no piece present: " + newLocation);
+		
+		this.selectedPieceLocation = newLocation;
+		
+		// Repaint the component
+		this.repaint();
+	}
+
 	/**
 	 * Adds a listener for clicks on this component.
 	 * @param listener The listener to add
