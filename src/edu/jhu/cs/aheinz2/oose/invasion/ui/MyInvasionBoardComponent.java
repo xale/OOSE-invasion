@@ -58,12 +58,16 @@ public class MyInvasionBoardComponent extends JComponent
 			@Override
 			public void receiveEvent(InvasionModelEvent event)
 			{
-				// If the turn or game ended, deselect the current piece
 				if (event.isTurnChanged() || event.isGameOver())
+				{
+					// If the turn or game ended, deselect the current piece and repaint the component
 					MyInvasionBoardComponent.this.setSelectedPieceLocation(null);
-				
-				// Repaint the component
-				MyInvasionBoardComponent.this.repaint();
+				}
+				else
+				{
+					// Otherwise, just repaint the component
+					MyInvasionBoardComponent.this.repaint();
+				}
 			}
 		};
 		

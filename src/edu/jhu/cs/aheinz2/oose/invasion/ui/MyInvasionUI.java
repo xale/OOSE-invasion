@@ -141,6 +141,7 @@ public class MyInvasionUI extends JFrame
 				this.model.move(selectedLocation, clickedLocation);
 				
 				// If successful (no exception thrown!) select the new location
+				// FIXME: overwrites NULLed locations
 				this.boardView.setSelectedPieceLocation(clickedLocation);
 			}
 			catch (IllegalMoveException illegalMove)
