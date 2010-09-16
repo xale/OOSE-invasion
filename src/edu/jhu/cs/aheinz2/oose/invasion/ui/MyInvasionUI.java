@@ -9,6 +9,8 @@
 package edu.jhu.cs.aheinz2.oose.invasion.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.event.*;
 
 import javax.swing.*;
 
@@ -23,6 +25,7 @@ public class MyInvasionUI extends JFrame
 	private Class<? extends InvasionModel> modelClass = null;
 	private InvasionModel model = null;
 	private InvasionModelListener modelListener = null;
+	private boolean gameOver;
 	
 	private MyInvasionBoardComponent boardView = new MyInvasionBoardComponent();
 	private JLabel statusLabel = new JLabel();
@@ -56,6 +59,26 @@ public class MyInvasionUI extends JFrame
 		// Create the first model instance
 		this.setModel(this.newModelInstance());
 		
+		// Create a click listener for the board component
+		this.boardView.addClickListener(new InvasionClickListener()
+		{
+			@Override
+			public void locationClicked(Location clickedLocation)
+			{
+				MyInvasionUI.this.observeLocationClicked(clickedLocation);
+			}
+		});
+		
+		// Create a listener for the "end turn" [/ "new game"] button
+		this.endButton.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				MyInvasionUI.this.endButtonPressed();
+			}
+		});
+		
 		// Set up the status label
 		this.statusLabel.setText(this.getCurrentPlayerName() + " play first.");
 		
@@ -78,11 +101,101 @@ public class MyInvasionUI extends JFrame
 	}
 
 	/**
+	 * Called whenever a player clicks the board component.
+	 * @param clickedLocation The location clicked on the board (may be null.)
+	 */
+	protected void observeLocationClicked(Location clickedLocation)
+	{
+		// If the player has "clicked off," clear the selection
+		if (clickedLocation == null)
+		{
+			this.boardView.setSelectedPieceLocation(null);
+			return;
+		}
+		
+		// If the player has clicked an opponent's piece, do nothing
+		Player pieceOwner = this.model.getPieceOwner(clickedLocation);
+		if ((pieceOwner != null) && !pieceOwner.equals(this.model.getCurrentPlayer()))
+		{
+			return;
+		}
+		
+		// If the player has clicked one of his or her own piece, toggle selection
+		if ((pieceOwner != null) && pieceOwner.equals(this.model.getCurrentPlayer()))
+		{
+			if (clickedLocation.equals(this.boardView.getSelectedPieceLocation()))
+				this.boardView.setSelectedPieceLocation(null);
+			else
+				this.boardView.setSelectedPieceLocation(clickedLocation);
+			
+			return;
+		}
+		
+		// If the player has clicked an empty location, and the player has a piece selected, attempt to move the piece
+		Location selectedLocation = this.boardView.getSelectedPieceLocation();
+		if ((pieceOwner == null) && (selectedLocation != null))
+		{
+			try
+			{
+				// Attempt to move the piece
+				this.model.move(selectedLocation, clickedLocation);
+				
+				// If successful (no exception thrown!) select the new location
+				this.boardView.setSelectedPieceLocation(clickedLocation);
+			}
+			catch (IllegalMoveException illegalMove)
+			{
+				// Display the reason the move is illegal on the status label
+				this.statusLabel.setForeground(Color.red);
+				this.statusLabel.setText(illegalMove.getMessage());
+			}
+			
+			return;
+		}
+	}
+	
+	/**
+	 * Called whenever the user presses the "end turn" button (which also functions as the "new game" button.)
+	 */
+	protected void endButtonPressed()
+	{
+		// Check if we're pretending to be a "new game" button
+		if (this.gameOver)
+		{
+			// Create a new model
+			this.setModel(this.newModelInstance());
+			
+			// Reset the status label
+			this.statusLabel.setText(this.getCurrentPlayerName() + " play first.");
+			
+			// Reset the "end turn" button
+			this.endButton.setText("End Turn");
+			
+			this.gameOver = false;
+			return;
+		}
+		
+		// Otherwise, attempt to end the turn
+		try
+		{
+			this.model.endTurn();
+		}
+		catch (IllegalMoveException illegalMove)
+		{
+			// Display the reason the move is illegal on the status label
+			this.statusLabel.setForeground(Color.red);
+			this.statusLabel.setText(illegalMove.getMessage());
+		}
+	}
+	
+	/**
 	 * Called whenever an InvasionModelEvent informing us of a change in board state is received.  
 	 */
 	protected void observeBoardChanged()
 	{
-		// TODO Auto-generated method stub
+		// Change the status label
+		this.statusLabel.setForeground(Color.black);
+		this.statusLabel.setText(this.getCurrentPlayerName() + "' turn."); 
 	}
 	
 	/**
@@ -91,6 +204,7 @@ public class MyInvasionUI extends JFrame
 	protected void observeTurnChanged()
 	{
 		// Change the status label
+		this.statusLabel.setForeground(Color.black);
 		this.statusLabel.setText(this.getCurrentPlayerName() + "' turn.");
 	}
 	
@@ -99,16 +213,57 @@ public class MyInvasionUI extends JFrame
 	 */
 	protected void observeGameEnded()
 	{
-		// TODO Auto-generated method stub
+		this.gameOver = true;
+		
+		// Update the status label with the winner
+		if (this.model.getWinner() != null)
+		{
+			this.statusLabel.setForeground(Color.green);
+			this.statusLabel.setText(this.getWinningPlayerName() + " win!");
+		}
+		else
+		{
+			// Don't think this can happen, but just in case
+			this.statusLabel.setForeground(Color.black);
+			this.statusLabel.setText("Draw!");
+		}
+		
+		// Change the "end turn" button to a "new game" button
+		this.endButton.setText("New Game");
 	}
 	
+	/**
+	 * Retrieves the name for the player whose turn it is.
+	 * @return The name of the player whose turn it is.
+	 */
 	private String getCurrentPlayerName()
 	{
-		if (model == null)
+		if (this.model == null)
 			return "";
 		
-		Player currentPlayer = this.model.getCurrentPlayer();
-		switch (currentPlayer)
+		return this.getNameForPlayer(this.model.getCurrentPlayer());
+	}
+	
+	/**
+	 * Returns the name for the winning player.
+	 * @return The name of the player who won the last game.
+	 */
+	private String getWinningPlayerName()
+	{
+		if (this.model == null)
+			return "";
+		
+		return this.getNameForPlayer(this.model.getWinner());
+	}
+	
+	/**
+	 * Returns a display name for a given player
+	 * @param player The player to name.
+	 * @return "Invaders" (if the player controls the pirates) or "Defenders" (if the player controls the bulgars.)
+	 */
+	private String getNameForPlayer(Player player)
+	{
+		switch (player)
 		{
 			case PIRATE:
 				return "Invaders";
@@ -118,7 +273,7 @@ public class MyInvasionUI extends JFrame
 				break;
 		}
 		
-		throw new RuntimeException("Invalid player in getCurrentPlayerName(): " + currentPlayer);
+		throw new RuntimeException("Invalid player in getCurrentPlayerName(): " + player);
 	}
 	
 	/**
@@ -140,6 +295,9 @@ public class MyInvasionUI extends JFrame
 		
 		// Update the board view's model
 		this.boardView.setModel(this.model);
+		
+		// Clear the "game over" flag
+		this.gameOver = false;
 	}
 	
 	/**
