@@ -11,8 +11,8 @@ package edu.jhu.cs.aheinz2.oose.invasion.ui;
 import edu.jhu.cs.oose.fall2010.invasion.iface.Location;
 
 /**
+ * A listener for click events on a board component, which include the location clicked.
  * @author alex_heinz
- *
  */
 public interface InvasionClickListener
 {
