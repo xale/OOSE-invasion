@@ -35,7 +35,7 @@ public class MyInvasionUI extends JFrame
 		// Set the window title
 		this.setTitle("Invasion");
 		
-		// Hold onto the class we're using for our model, so we can generate more if necessary
+		// Hold onto the class we're using for our model, so we can generate more model objects
 		this.modelClass = modelClass;
 		
 		// Create a listener for the model
@@ -57,7 +57,7 @@ public class MyInvasionUI extends JFrame
 		this.setModel(this.newModelInstance());
 		
 		// Set up the status label
-		this.statusLabel.setText("Pirates play first.");
+		this.statusLabel.setText(this.getCurrentPlayerName() + " play first.");
 		
 		// Add the status label and button to a panel to be placed at the bottom of the window
 		JPanel bottomPanel = new JPanel(new BorderLayout());
@@ -90,7 +90,8 @@ public class MyInvasionUI extends JFrame
 	 */
 	protected void observeTurnChanged()
 	{
-		// TODO Auto-generated method stub
+		// Change the status label
+		this.statusLabel.setText(this.getCurrentPlayerName() + "' turn.");
 	}
 	
 	/**
@@ -99,6 +100,25 @@ public class MyInvasionUI extends JFrame
 	protected void observeGameEnded()
 	{
 		// TODO Auto-generated method stub
+	}
+	
+	private String getCurrentPlayerName()
+	{
+		if (model == null)
+			return "";
+		
+		Player currentPlayer = this.model.getCurrentPlayer();
+		switch (currentPlayer)
+		{
+			case PIRATE:
+				return "Invaders";
+			case BULGAR:
+				return "Defenders";
+			default:
+				break;
+		}
+		
+		throw new RuntimeException("Invalid player in getCurrentPlayerName(): " + currentPlayer);
 	}
 	
 	/**
