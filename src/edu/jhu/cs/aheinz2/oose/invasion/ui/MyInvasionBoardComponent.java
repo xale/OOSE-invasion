@@ -40,6 +40,8 @@ public class MyInvasionBoardComponent extends JComponent
 	private ImageIcon selectedInvaderImage = null;
 	private ImageIcon defenderImage = null;
 	private ImageIcon selectedDefenderImage = null;
+	private static final double TURN_PIECE_IMAGE_X = (1.5 * HORIZ_GRID_SPACING);
+	private static final double TURN_PIECE_IMAGE_Y = (6.5 * VERT_GRID_SPACING);
 	
 	private AffineTransform currentTransform = new AffineTransform();
 	
@@ -179,6 +181,12 @@ public class MyInvasionBoardComponent extends JComponent
 				pieceImage.paintIcon(this, g2d, drawX, drawY);
 			}
 		}
+		
+		// Draw the piece indicating whose turn it is
+		ImageIcon turnPieceImage = this.pieceImageForPlayer(this.model.getCurrentPlayer(), false);
+		int turnPieceX = (int)(TURN_PIECE_IMAGE_X - (turnPieceImage.getIconWidth() / 2));
+		int turnPieceY = (int)(TURN_PIECE_IMAGE_Y - (turnPieceImage.getIconHeight() / 2));
+		turnPieceImage.paintIcon(this, g2d, turnPieceX, turnPieceY);
 	}
 	
 	/**
@@ -256,7 +264,7 @@ public class MyInvasionBoardComponent extends JComponent
 	}
 	
 	/**
-	 * Recalculates the current affine transform for the component size.
+	 * Calculates the affine transform appropriate for the component size.
 	 */
 	protected void recalculateTransform()
 	{
