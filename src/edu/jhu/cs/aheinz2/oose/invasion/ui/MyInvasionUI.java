@@ -137,12 +137,15 @@ public class MyInvasionUI extends JFrame
 		{
 			try
 			{
-				// Attempt to move the piece
+				// Make note of whose turn it is before the move (only necessary for models that automatically end the turn)
+				Player playerToMove = this.model.getCurrentPlayer();
+				
+				// Attempt to move the piece, catching the exception in the event of an illegal move
 				this.model.move(selectedLocation, clickedLocation);
 				
-				// If successful (no exception thrown!) select the new location
-				// FIXME: overwrites NULLed locations
-				this.boardView.setSelectedPieceLocation(clickedLocation);
+				// If the turn hasn't ended, and the game isn't over, select the moved piece
+				if (playerToMove.equals(this.model.getCurrentPlayer()) && !this.gameOver)
+					this.boardView.setSelectedPieceLocation(clickedLocation);
 			}
 			catch (IllegalMoveException illegalMove)
 			{
@@ -194,7 +197,7 @@ public class MyInvasionUI extends JFrame
 	{
 		// Change the status label
 		this.statusLabel.setForeground(Color.black);
-		this.statusLabel.setText(this.getCurrentPlayerName() + "' turn."); 
+		this.statusLabel.setText(this.getCurrentPlayerName() + "' turn.");
 	}
 	
 	/**
@@ -202,6 +205,9 @@ public class MyInvasionUI extends JFrame
 	 */
 	protected void observeTurnChanged()
 	{
+		// Clear the board selection
+		this.boardView.setSelectedPieceLocation(null);
+		
 		// Change the status label
 		this.statusLabel.setForeground(Color.black);
 		this.statusLabel.setText(this.getCurrentPlayerName() + "' turn.");
@@ -213,6 +219,9 @@ public class MyInvasionUI extends JFrame
 	protected void observeGameEnded()
 	{
 		this.gameOver = true;
+		
+		// Clear the board selection
+		this.boardView.setSelectedPieceLocation(null);
 		
 		// Update the status label with the winner
 		if (this.model.getWinner() != null)
