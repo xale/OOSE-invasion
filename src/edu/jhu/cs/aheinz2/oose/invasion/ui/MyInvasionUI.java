@@ -25,7 +25,7 @@ public class MyInvasionUI extends JFrame
 	private Class<? extends InvasionModel> modelClass = null;
 	private InvasionModel model = null;
 	private InvasionModelListener modelListener = null;
-	private boolean gameOver;
+	private boolean gameOver = false;
 	
 	private MyInvasionBoardComponent boardView = new MyInvasionBoardComponent();
 	private JLabel statusLabel = new JLabel();
@@ -150,8 +150,6 @@ public class MyInvasionUI extends JFrame
 				this.statusLabel.setForeground(Color.red);
 				this.statusLabel.setText(illegalMove.getMessage());
 			}
-			
-			return;
 		}
 	}
 	
@@ -260,16 +258,16 @@ public class MyInvasionUI extends JFrame
 	/**
 	 * Returns a display name for a given player
 	 * @param player The player to name.
-	 * @return "Invaders" (if the player controls the pirates) or "Defenders" (if the player controls the bulgars.)
+	 * @return "Pirates" (if the player controls the pirates) or "Bulgars" (if the player controls the bulgars.)
 	 */
 	private String getNameForPlayer(Player player)
 	{
 		switch (player)
 		{
 			case PIRATE:
-				return "Invaders";
+				return "Pirates";
 			case BULGAR:
-				return "Defenders";
+				return "Bulgars";
 			default:
 				break;
 		}
