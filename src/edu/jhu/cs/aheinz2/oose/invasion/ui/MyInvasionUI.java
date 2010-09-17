@@ -79,9 +79,6 @@ public class MyInvasionUI extends JFrame
 			}
 		});
 		
-		// Set up the status label
-		this.statusLabel.setText(this.getCurrentPlayerName() + " play first.");
-		
 		// Add the status label and button to a panel to be placed at the bottom of the window
 		JPanel bottomPanel = new JPanel(new BorderLayout());
 		bottomPanel.add(this.statusLabel, BorderLayout.CENTER);
@@ -167,13 +164,9 @@ public class MyInvasionUI extends JFrame
 			// Create a new model
 			this.setModel(this.newModelInstance());
 			
-			// Reset the status label
-			this.statusLabel.setText(this.getCurrentPlayerName() + " play first.");
-			
 			// Reset the "end turn" button
 			this.endButton.setText("End Turn");
 			
-			this.gameOver = false;
 			return;
 		}
 		
@@ -303,6 +296,10 @@ public class MyInvasionUI extends JFrame
 		
 		// Update the board view's model
 		this.boardView.setModel(this.model);
+		
+		// Reset the status label
+		this.statusLabel.setForeground(Color.black);
+		this.statusLabel.setText(this.getCurrentPlayerName() + " play first.");
 		
 		// Clear the "game over" flag
 		this.gameOver = false;
