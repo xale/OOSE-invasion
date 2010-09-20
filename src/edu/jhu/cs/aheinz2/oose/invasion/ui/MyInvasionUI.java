@@ -103,6 +103,10 @@ public class MyInvasionUI extends JFrame
 	 */
 	protected void observeLocationClicked(Location clickedLocation)
 	{
+		// If the game is over, disregard clicks
+		if (this.gameOver)
+			return;
+		
 		// If the player has "clicked off," clear the selection
 		if (clickedLocation == null)
 		{
