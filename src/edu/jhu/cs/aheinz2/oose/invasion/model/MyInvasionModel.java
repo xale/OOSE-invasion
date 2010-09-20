@@ -585,7 +585,7 @@ public class MyInvasionModel implements InvasionModel
 			{
 				for (int y = InvasionModelConstants.INVASION_BOARD_FORTRESS_MIN_Y; occupied && (y <= InvasionModelConstants.INVASION_BOARD_FORTRESS_MAX_Y); y++)
 				{
-					MyInvasionPiece piece = this.contents[x][y]; 
+					MyInvasionPiece piece = this.contents[x][y];
 					if ((piece == null) || !piece.getOwner().equals(Player.PIRATE))
 						occupied = false;
 				}
@@ -671,10 +671,6 @@ public class MyInvasionModel implements InvasionModel
 		 */
 		private MyInvasionPiece getPieceAtCoordinates(int x, int y)
 		{
-			// Check if the coordinates are valid (i.e., on the board)
-			if (!InvasionConstants.coordinatesAreOnBoard(x, y))
-				throw new RuntimeException("Piece requested at coordinates not on board: (" + x + ", " + y + ")");
-			
 			// Return the contents of the board at the specified coordinates
 			return this.contents[x][y];
 		}
